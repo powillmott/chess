@@ -13,7 +13,6 @@ public class ChessPiece {
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
     }
-
     /**
      * The various different chess piece options
      */
