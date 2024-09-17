@@ -9,7 +9,7 @@ package chess;
 public class ChessBoard {
     private ChessPiece[][] squares = new ChessPiece[8][8];
     public ChessBoard() {
-        
+
     }
 
     /**
@@ -20,6 +20,7 @@ public class ChessBoard {
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
         squares[position.getRow()][position.getColumn()] = piece;
+        /* TODO implement qualifiers */
     }
 
     /**
