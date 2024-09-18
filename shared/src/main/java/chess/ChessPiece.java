@@ -90,6 +90,15 @@ public class ChessPiece {
         if(this.pieceType == KNIGHT) {
             returnVal.addAll(new KnightCalculator().pieceMoves(board, myPosition));
         }
+        if(this.pieceType == KING) {
+            returnVal.addAll(new KingCalculator().pieceMoves(board, myPosition));
+        }
+        if(this.pieceType == QUEEN) {
+            returnVal.addAll(new QueenCalculator().pieceMoves(board, myPosition));
+        }
+        if(this.pieceType == PAWN) {
+            returnVal.addAll(new PawnCalculator().pieceMoves(board, myPosition));
+        }
         return returnVal;
     }
 }
