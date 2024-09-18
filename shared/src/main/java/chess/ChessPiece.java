@@ -2,7 +2,7 @@ package chess;
 
 import java.util.*;
 
-import static chess.ChessPiece.PieceType.BISHOP;
+import static chess.ChessPiece.PieceType.*;
 
 /**
  * Represents a single chess piece
@@ -82,10 +82,14 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> returnVal = new ArrayList<>();
         if(this.pieceType == BISHOP) {
-            MovementRules temp = new BishopCalculator();
-            returnVal.addAll(temp.pieceMoves(board, myPosition));
-
+            returnVal.addAll(new BishopCalculator().pieceMoves(board, myPosition));
         }
-        return new ArrayList<>();
+        if(this.pieceType == ROOK) {
+            returnVal.addAll(new RookCalculator().pieceMoves(board, myPosition));
+        }
+        if(this.pieceType == KNIGHT) {
+            returnVal.addAll(new KnightCalculator().pieceMoves(board, myPosition));
+        }
+        return returnVal;
     }
 }
