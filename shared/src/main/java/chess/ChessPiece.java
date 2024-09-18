@@ -78,16 +78,6 @@ public class ChessPiece {
      */
 
 
-//    public class BishopMovementRule extends BaseMovementRule {
-//        public Collection<ChessMove> moves(ChessBoard board, ChessPosition position) {
-//            var moves = new HashSet<ChessMove>();
-//            calculateMoves(board, position, -1, -1, moves, true);
-//            calculateMoves(board, position, 1, -1, moves, true);
-//            calculateMoves(board, position, -1, 1, moves, true);
-//            calculateMoves(board, position, 1, 1, moves, true);
-//            return moves;
-//        }
-//    }
 
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> returnVal = new ArrayList<>();
