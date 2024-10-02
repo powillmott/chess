@@ -122,6 +122,7 @@ public class ChessGame {
      * @param teamColor which team to check for check
      * @return True if the specified team is in check
      */
+
     public boolean isInCheck(TeamColor teamColor) {
         for(int i = 1; i < 9; i++) {
             for(int j = 1; j < 9; j++) {
