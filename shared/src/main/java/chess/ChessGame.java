@@ -76,6 +76,7 @@ public class ChessGame {
             if(!isInCheck(temp1.getTeamColor())){
                 returnval.add(move);
             }
+
             if(temp1.getPieceType() == ChessPiece.PieceType.KING){
                 if(temp1.getTeamColor() == TeamColor.WHITE){
                     wKing = startPosition;
