@@ -113,7 +113,12 @@ public class ChessGame {
         //make move
         ChessPiece temp = this.squares.getPiece(move.getStartPosition());
         this.squares.addPiece(move.getStartPosition(), null);
-        this.squares.addPiece(move.getEndPosition(), temp);
+        if(move.getPromotionPiece() != null){
+            this.squares.addPiece(move.getEndPosition(), new ChessPiece(team,move.getPromotionPiece()));
+        } else{
+            this.squares.addPiece(move.getEndPosition(), temp);
+        }
+
         //update king location if necessary
         if(temp.getPieceType() == ChessPiece.PieceType.KING){
             if(temp.getTeamColor() == TeamColor.WHITE){
