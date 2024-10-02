@@ -1,4 +1,4 @@
-package chess.game;
+package game;
 
 import chess.*;
 import org.junit.jupiter.api.*;
