@@ -13,6 +13,14 @@ import java.util.Objects;
 
 
 public class ChessBoard {
+
+    @Override
+    public String toString() {
+        return "ChessBoard{" +
+                "squares=" + Arrays.deepToString(squares) +
+                '}';
+    }
+
     private ChessPiece[][] squares;
     public ChessBoard() {
         this.squares = new ChessPiece[8][8];
@@ -110,13 +118,6 @@ public class ChessBoard {
         addPiece(new ChessPosition(7,6),BPawn6);
         addPiece(new ChessPosition(7,7), BPawn7);
         addPiece(new ChessPosition(7,8), BPawn8);
-    }
-
-    @Override
-    public String toString() {
-        return "ChessBoard{" +
-                "squares=" + Arrays.toString(squares) +
-                '}';
     }
 
     @Override
