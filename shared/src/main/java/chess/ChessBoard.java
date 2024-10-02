@@ -13,9 +13,9 @@ import java.util.Objects;
 
 
 public class ChessBoard {
-    private ChessPiece[][] squares = new ChessPiece[8][8];
+    private ChessPiece[][] squares;
     public ChessBoard() {
-
+        this.squares = new ChessPiece[8][8];
     }
 
     /**
@@ -25,7 +25,7 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        squares[position.getRow()-1][position.getColumn()-1] = piece;
+        this.squares[position.getRow()-1][position.getColumn()-1] = piece;
     }
 
     /**
@@ -36,7 +36,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        return squares[position.getRow()-1][position.getColumn()-1];
+        return this.squares[position.getRow()-1][position.getColumn()-1];
     }
 
     /**
@@ -45,7 +45,7 @@ public class ChessBoard {
      */
     public void resetBoard() {
         //clear
-        squares = new ChessPiece[8][8];
+        this.squares = new ChessPiece[8][8];
         ChessPiece WKing = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING);
         ChessPiece WQueen = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN);
         ChessPiece WKnight1 = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);

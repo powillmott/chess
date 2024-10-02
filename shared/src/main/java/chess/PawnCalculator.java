@@ -6,6 +6,7 @@ import java.util.Collection;
 public class PawnCalculator implements MovementRules {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
 
+
         ArrayList<ChessMove> temp = new ArrayList<ChessMove>();
         ChessGame.TeamColor color = board.getPiece(new ChessPosition(position.getRow(), position.getColumn())).getTeamColor();
         if(color == ChessGame.TeamColor.WHITE) {

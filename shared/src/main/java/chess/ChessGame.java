@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -11,8 +12,13 @@ import java.util.Collection;
 public class ChessGame {
 
     private final TeamColor team;
+    private ChessBoard squares;
+    private ChessPosition wKing = new ChessPosition(1, 5);
+    private ChessPosition bKing = new ChessPosition(8, 5);
     public ChessGame() {
         this.team = TeamColor.WHITE;
+        this.squares = new ChessBoard();
+
     }
 
     /**
@@ -52,8 +58,35 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        Collection<ChessMove> moves = this.squares.getPiece(startPosition).pieceMoves(this.squares,startPosition);
+        Collection<ChessMove> returnval = new ArrayList<>();
+        for(ChessMove move : moves){
+            ChessPiece temp1 = this.squares.getPiece(startPosition);
+            ChessPiece temp2 = this.squares.getPiece(move.getEndPosition());
+            this.squares.addPiece(startPosition, null);
+            this.squares.addPiece(move.getEndPosition(), temp1);
+            if(!isInCheck(temp1.getTeamColor())){
+                returnval.add(move);
+            }
+            this.squares.addPiece(startPosition, temp1);
+            this.squares.addPiece(move.getEndPosition(), temp2);
+        }
+        return returnval;
     }
+//        boolean possible = true;
+//        Collection<ChessMove> moves = new ArrayList<>();
+//        ChessPiece temp = this.squares.getPiece(startPosition);
+//        ChessPiece temp2 = this.squares.getPiece(startPosition);
+//        this.squares.addPiece(startPosition, null);
+//        if(isInCheck(this.team)){
+//            possible = false;
+//        }
+//        this.squares.addPiece(startPosition, temp);
+//        if(possible){
+//            moves = squares.getPiece(startPosition).pieceMoves(squares, startPosition);
+//        }
+//        return moves;
+//    }
 
     /**
      * Makes a move in a chess game
@@ -62,7 +95,7 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+
     }
 
     /**
@@ -72,7 +105,19 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        for(int i = 1; i < 9; i++) {
+            for(int j = 1; j < 9; j++) {
+                if(this.squares.getPiece(new ChessPosition(i, j)) != null) {
+                    Collection<ChessMove> temp = this.squares.getPiece(new ChessPosition(i, j)).pieceMoves(this.squares, new ChessPosition(i, j));
+                    for (ChessMove move : temp) {
+                        if (move.getEndPosition() == wKing | move.getEndPosition() == bKing) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -102,7 +147,20 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        this.squares = board;
+        for(int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; j++) {
+                if(this.squares.getPiece(new ChessPosition(i,j)) != null) {
+                    if (this.squares.getPiece(new ChessPosition(i, j)).getTeamColor() == TeamColor.WHITE && this.squares.getPiece(new ChessPosition(i, j)).getPieceType() == ChessPiece.PieceType.KING) {
+                        wKing = new ChessPosition(i, j);
+                    }
+                    if (this.squares.getPiece(new ChessPosition(i, j)).getTeamColor() == TeamColor.BLACK && this.squares.getPiece(new ChessPosition(i, j)).getPieceType() == ChessPiece.PieceType.KING) {
+                        bKing = new ChessPosition(i, j);
+                    }
+                }
+            }
+        }
+
     }
 
     /**
