@@ -74,20 +74,7 @@ public class ChessGame {
         }
         return returnval;
     }
-//        boolean possible = true;
-//        Collection<ChessMove> moves = new ArrayList<>();
-//        ChessPiece temp = this.squares.getPiece(startPosition);
-//        ChessPiece temp2 = this.squares.getPiece(startPosition);
-//        this.squares.addPiece(startPosition, null);
-//        if(isInCheck(this.team)){
-//            possible = false;
-//        }
-//        this.squares.addPiece(startPosition, temp);
-//        if(possible){
-//            moves = squares.getPiece(startPosition).pieceMoves(squares, startPosition);
-//        }
-//        return moves;
-//    }
+
 
     /**
      * Makes a move in a chess game
