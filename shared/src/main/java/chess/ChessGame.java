@@ -19,6 +19,7 @@ public class ChessGame {
     public ChessGame() {
         this.team = TeamColor.WHITE;
         this.squares = new ChessBoard();
+        this.squares.resetBoard();;
 
     }
 
@@ -100,20 +101,36 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         //check if move is valid (through exception if not)
+        boolean pass = false;
+        for(ChessMove temp : validMoves(move.getStartPosition())){
+            if (Objects.equals(move.getEndPosition(), temp.getEndPosition())) {
+                pass = true;
+                break;
+            }
+        }
+        if(!pass){
+            throw new InvalidMoveException();
+        }
         //make move
-        //update king location if necessary
         ChessPiece temp = this.squares.getPiece(move.getStartPosition());
         this.squares.addPiece(move.getStartPosition(), null);
         this.squares.addPiece(move.getEndPosition(), temp);
+        //update king location if necessary
+        if(temp.getPieceType() == ChessPiece.PieceType.KING){
+            if(temp.getTeamColor() == TeamColor.WHITE){
+                wKing = move.getEndPosition();
+            }
+            if(temp.getTeamColor() == TeamColor.BLACK){
+                bKing = move.getEndPosition();
+            }
+        }
         //change team turn
         setTeamTurn(temp.getTeamColor());
         //check if new team is in checkmate or stalemate
-        if(isInCheck(this.team)){
-            //somehow indicate other team has won
-        }
-        if(isInStalemate(this.team)){
-            //somehow indicate that it is a stalemate
-        }
+//        if(isInCheck(this.team)){
+//        }
+//        if(isInStalemate(this.team)){
+//        }
     }
 
     /**
@@ -162,7 +179,7 @@ public class ChessGame {
                 }
             }
         }
-        return !temp.isEmpty();
+        return temp.isEmpty();
     }
 
     /**
@@ -186,7 +203,7 @@ public class ChessGame {
                 }
             }
         }
-        return !temp.isEmpty();
+        return temp.isEmpty();
     }
 
     /**
