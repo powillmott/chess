@@ -8,8 +8,14 @@ import spark.*;
 
 public class RegisterHandler implements Route{
 
-    private final DataAccess dataAccess = new MemoryDataAccess();
-    public final service.Service serv = new Service(dataAccess);
+    private final DataAccess dataAccess;
+
+    public RegisterHandler(DataAccess dataAccess) {
+        this.dataAccess = dataAccess;
+    }
+    public final Service serv = new Service(dataAccess);
+
+
 
     public Object handle(Request req, Response res) throws Exception {
         var newUser = new Gson().fromJson(req.body(), UserData.class);

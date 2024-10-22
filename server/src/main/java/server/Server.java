@@ -20,13 +20,13 @@ public class Server {
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
-
         Spark.staticFiles.location("web");
+        final DataAccess dataAccess = new MemoryDataAccess();
 
         // Register your endpoints and handle exceptions here.
-        Spark.delete("/db", new ClearHandler());
+        Spark.delete("/db", new ClearHandler(dataAccess));
 
-        Spark.post("/user", new RegisterHandler());
+        Spark.post("/user", new RegisterHandler(dataAccess));
 
         Spark.post("/session", new LoginHandler());
 
