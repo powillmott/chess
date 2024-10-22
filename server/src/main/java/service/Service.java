@@ -2,6 +2,8 @@ package service;
 import dataaccess.DataAccess;
 import models.AuthData;
 import models.UserData;
+
+import java.util.Objects;
 import java.util.UUID;
 
 public class Service {
@@ -23,9 +25,21 @@ public class Service {
             throw new ServiceException("User already exists");
         } else {
             dataAccess.makeUser(newUser.username(), newUser);
-            newAuth = dataAccess.makeAuth(newUser.username(), new AuthData(UUID.randomUUID().toString(), newUser.username()));
+            newAuth = createAuth(newUser.username());
         }
 
+        return newAuth;
+    }
+
+    private AuthData createAuth(String userName){
+        return dataAccess.makeAuth(userName, new AuthData(UUID.randomUUID().toString(), userName));
+    }
+
+    public AuthData loginUser(String username, String password) throws ServiceException {
+        AuthData newAuth = null;
+        if (Objects.equals(dataAccess.getUser(username).password(), password)) {
+            newAuth = createAuth(username);
+        }
         return newAuth;
     }
 
