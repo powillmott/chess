@@ -1,15 +1,16 @@
+package server;
+
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
+import dataaccess.MemoryDataAccess;
 import handlers.*;
 import service.Service;
 import spark.*;
 public class Server {
 
-
     public static void main(String[] args) {
         try{
-//            int port = Integer.parseInt(args[0]);
-            int port = 8080;
+            int port = Integer.parseInt(args[0]);
             new Server().run(port);
         } catch(ArrayIndexOutOfBoundsException | NumberFormatException ex){
             System.err.println("Specify the port number as a command line parameter");
