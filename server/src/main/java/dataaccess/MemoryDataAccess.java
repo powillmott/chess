@@ -61,4 +61,9 @@ public class MemoryDataAccess implements DataAccess {
         return auth;
     }
 
+    @Override
+    public boolean validAuth(String authToken) {
+        return auth.containsKey(authToken);
+    }
+
 }

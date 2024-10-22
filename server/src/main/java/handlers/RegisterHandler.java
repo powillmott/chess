@@ -2,8 +2,10 @@ package handlers;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
+import models.AuthData;
 import models.UserData;
 import service.Service;
+import service.ServiceException;
 import spark.*;
 
 public class RegisterHandler implements Route{
@@ -20,8 +22,22 @@ public class RegisterHandler implements Route{
 
     public Object handle(Request req, Response res) throws Exception {
         var newUser = new Gson().fromJson(req.body(), UserData.class);
-        var result = serv.registerUser(newUser);
-        return new Gson().toJson(result);
+        res.status(200);
+        AuthData result = null;
+        try {
+            result = serv.registerUser(newUser);
 
+        } catch (ServiceException e) {
+            if (e.getMessage().equals("bad request")){
+                res.status(400);
+            } else if (e.getMessage().equals("already taken")) {
+                res.status(403);
+            }
+            res.body("message: Error: " + e.getMessage());
+
+        } catch (Exception e) {
+            res.status(500);
+        }
+        return new Gson().toJson(result);
     }
 }

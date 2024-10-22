@@ -16,4 +16,5 @@ public interface DataAccess {
     Map<Integer, GameData> getAllGames();
     Map<String, UserData> getAllUsers();
     Map<String, AuthData> getAllAuth();
+    boolean validAuth(String authToken);
 }

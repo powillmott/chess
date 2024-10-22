@@ -21,8 +21,10 @@ public class Service {
 
     public AuthData registerUser(UserData newUser) throws ServiceException {
         AuthData newAuth;
-        if (dataAccess.getUser(newUser.username()) != null) {
-            throw new ServiceException("User already exists");
+        if (newUser.username().isEmpty() | newUser.password().isEmpty() | newUser.email().isEmpty()) {
+            throw new ServiceException("bad request");
+        } else if (dataAccess.getUser(newUser.username()) != null) {
+            throw new ServiceException("already taken");
         } else {
             dataAccess.makeUser(newUser.username(), newUser);
             newAuth = createAuth(newUser.username());
@@ -42,6 +44,10 @@ public class Service {
         }
         return newAuth;
     }
+
+//    public String createGame(String gameName) throws ServiceException {
+//
+//    }
 
 
 
