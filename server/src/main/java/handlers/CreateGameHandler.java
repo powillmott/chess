@@ -15,8 +15,13 @@ import java.util.Random;
 
 
 public class CreateGameHandler implements Route {
-    private final DataAccess dataAccess = new MemoryDataAccess();
-    public final service.Service serv = new Service(dataAccess);
+    public final service.Service serv;
+
+    DataAccess dataAccess;
+    public CreateGameHandler(DataAccess dataAccess) {
+        this.dataAccess = dataAccess;
+        serv = new Service(dataAccess);
+    }
 
     public Object handle(Request req, Response res){
         var newGame = new Gson().fromJson(req.body(), GameData.class);

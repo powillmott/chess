@@ -8,13 +8,14 @@ import java.util.Map;
 public interface DataAccess {
     UserData getUser(String userName);
     UserData makeUser(String userName, UserData userData);
-    AuthData getAuth(String userName);
-    AuthData makeAuth(String userName, AuthData authData);
+    String getAuth(String userName);
+    AuthData makeAuth(String authToken, String userName);
     void clearAllUsers();
     void clearAllAuth();
     void clearAllGames();
     Map<Integer, GameData> getAllGames();
     Map<String, UserData> getAllUsers();
-    Map<String, AuthData> getAllAuth();
+    Map<String, String> getAllAuth();
     boolean validAuth(String authToken);
+    void removeUser(String authToken);
 }

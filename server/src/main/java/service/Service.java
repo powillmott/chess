@@ -37,7 +37,7 @@ public class Service {
     }
 
     private AuthData createAuth(String userName){
-        return dataAccess.makeAuth(userName, new AuthData(UUID.randomUUID().toString(), userName));
+        return dataAccess.makeAuth(UUID.randomUUID().toString(),userName);
     }
 
     public AuthData loginUser(String username, String password) throws ServiceException {
@@ -49,6 +49,14 @@ public class Service {
         }
         newAuth = createAuth(username);
         return newAuth;
+    }
+
+    public void logoutUser(String authToken) throws ServiceException {
+        if(!dataAccess.validAuth(authToken)) {
+            throw new ServiceException("unauthorized");
+        }
+//        String newUsername = dataAccess.getUser(authToken).username();
+        dataAccess.removeUser(authToken);
     }
 
     public GameData createGame(String authToken, String gameName) throws ServiceException {

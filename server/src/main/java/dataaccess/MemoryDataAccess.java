@@ -7,7 +7,7 @@ import java.util.Map;
 public class MemoryDataAccess implements DataAccess {
     final private Map<String, UserData> users = new HashMap<>();
     final private Map<Integer, GameData> games = new HashMap<>();
-    final private Map<String, AuthData> auth = new HashMap<>();
+    final private Map<String, String> auth = new HashMap<>();
 
     @Override
     public UserData getUser(String userName) {
@@ -21,14 +21,14 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public AuthData getAuth(String userName) {
+    public String getAuth(String userName) {
         return null;
     }
 
     @Override
-    public AuthData makeAuth(String userName, AuthData authData) {
-        auth.put(userName, authData);
-        return authData;
+    public AuthData makeAuth(String authToken, String userName) {
+        auth.put(authToken, userName);
+        return new AuthData(authToken,userName);
     }
 
     @Override
@@ -57,13 +57,18 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public Map<String, AuthData> getAllAuth() {
+    public Map<String, String> getAllAuth() {
         return auth;
     }
 
     @Override
     public boolean validAuth(String authToken) {
         return auth.containsKey(authToken);
+    }
+
+    @Override
+    public void removeUser(String authToken) {
+        auth.remove(authToken);
     }
 
 }
