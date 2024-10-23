@@ -202,14 +202,10 @@ public class ChessGame {
             return false;
         }
         Collection<ChessMove> temp = new ArrayList<>();
-        for(int i = 1; i < 9; i++) {
-            for (int j = 1; j < 9; j++) {
-                if(this.squares.getPiece(new ChessPosition(i, j)) != null) {
-                    if(this.squares.getPiece(new ChessPosition(i,j)).getTeamColor() == teamColor) {
-                        temp.addAll(validMoves(new ChessPosition(i,j)));
+        for (ChessPosition position : iterateThroughBoard()) {
+            if(this.squares.getPiece(position).getTeamColor() == teamColor) {
+                        temp.addAll(validMoves(position));
                     }
-                }
-            }
         }
         return temp.isEmpty();
     }
@@ -223,19 +219,15 @@ public class ChessGame {
         this.squares = board;
         wKing = null;
         bKing = null;
-        for(int i = 1; i < 9; i++) {
-            for (int j = 1; j < 9; j++) {
-                if(this.squares.getPiece(new ChessPosition(i,j)) != null) {
-                    if (this.squares.getPiece(new ChessPosition(i, j)).getTeamColor() == TeamColor.WHITE && this.squares.getPiece(new ChessPosition(i, j)).getPieceType() == ChessPiece.PieceType.KING) {
-                        wKing = new ChessPosition(i, j);
-                    }
-                    if (this.squares.getPiece(new ChessPosition(i, j)).getTeamColor() == TeamColor.BLACK && this.squares.getPiece(new ChessPosition(i, j)).getPieceType() == ChessPiece.PieceType.KING) {
-                        bKing = new ChessPosition(i, j);
-                    }
-                }
+        for (ChessPosition position : iterateThroughBoard()) {
+            boolean isKing = this.squares.getPiece(position).getPieceType() == ChessPiece.PieceType.KING;
+            if (this.squares.getPiece(position).getTeamColor() == TeamColor.WHITE && isKing) {
+                wKing = position;
+            }
+            if (this.squares.getPiece(position).getTeamColor() == TeamColor.BLACK && isKing) {
+                bKing = position;
             }
         }
-
     }
 
     /**

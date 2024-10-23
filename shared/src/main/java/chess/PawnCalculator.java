@@ -80,15 +80,18 @@ public class PawnCalculator implements MovementRules {
         if(!((color == ChessGame.TeamColor.WHITE && position.getRow() == 2) || (color == ChessGame.TeamColor.BLACK && position.getRow() == 7))) {
             return false;
         }
-        return board.getPiece(new ChessPosition(position.getRow() + rowInc, position.getColumn())) == null && board.getPiece(new ChessPosition(position.getRow() + (rowInc/2), position.getColumn())) == null;
+        boolean canMoveOne = board.getPiece(new ChessPosition(position.getRow() + (rowInc/2), position.getColumn())) == null;
+        boolean canMoveTwo = board.getPiece(new ChessPosition(position.getRow() + rowInc, position.getColumn())) == null;
+        return canMoveOne && canMoveTwo;
     }
 
     private void addMove(ChessPosition position, int rowInc, int colInc, ArrayList<ChessMove> temp, ChessGame.TeamColor color) {
         if ((color == ChessGame.TeamColor.WHITE && position.getRow() + 1 == 8) || (color == ChessGame.TeamColor.BLACK && position.getRow() - 1 == 1)) {
-            temp.add(new ChessMove(position, new ChessPosition(position.getRow() + rowInc, position.getColumn() + colInc), ChessPiece.PieceType.QUEEN));
-            temp.add(new ChessMove(position, new ChessPosition(position.getRow() + rowInc, position.getColumn() + colInc), ChessPiece.PieceType.ROOK));
-            temp.add(new ChessMove(position, new ChessPosition(position.getRow() + rowInc, position.getColumn() + colInc), ChessPiece.PieceType.KNIGHT));
-            temp.add(new ChessMove(position, new ChessPosition(position.getRow() + rowInc, position.getColumn() + colInc), ChessPiece.PieceType.BISHOP));
+            ChessPosition newPosition = new ChessPosition(position.getRow() + rowInc, position.getColumn() + colInc);
+            temp.add(new ChessMove(position, newPosition, ChessPiece.PieceType.QUEEN));
+            temp.add(new ChessMove(position, newPosition, ChessPiece.PieceType.ROOK));
+            temp.add(new ChessMove(position, newPosition, ChessPiece.PieceType.KNIGHT));
+            temp.add(new ChessMove(position, newPosition, ChessPiece.PieceType.BISHOP));
         } else {
             temp.add(new ChessMove(position, new ChessPosition(position.getRow() + rowInc, position.getColumn() + colInc), null));
         }
