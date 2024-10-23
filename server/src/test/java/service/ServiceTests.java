@@ -1,61 +1,115 @@
 package service;
 
+import dataaccess.DataAccess;
+import dataaccess.MemoryDataAccess;
+import models.AuthData;
+import models.GameData;
+import models.UserData;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import passoff.model.TestCreateRequest;
 import passoff.model.TestUser;
 
 public class ServiceTests {
+    private static DataAccess dataAccess;
+    private static Service serv;
+    private static UserData user1;
+    AuthData authTest;
     @BeforeAll
     public static void init() {
-        existingUser = new TestUser("ExistingUser", "existingUserPassword", "eu@mail.com");
+        dataAccess = new MemoryDataAccess();
+        serv = new Service(dataAccess);
+        user1 = new UserData("testUser","testPassword","test@cs");
 
-        newUser = new TestUser("NewUser", "newUserPassword", "nu@mail.com");
+    }
 
-        createRequest = new TestCreateRequest("testGame");
+    @BeforeEach
+    public void setUp() {
+        serv.clearAll();
+        authTest = serv.registerUser(user1);
     }
 
     @Test
     public void ClearAllGood() {
 
+        serv.createGame(authTest.authToken(),"testGame",null);
+        Assertions.assertTrue(serv.clearAll());
     }
 
     @Test
-    public void ClearAllBad() {}
+    public void RegisterUserGood() {
+        serv.clearAll();
+        authTest = serv.registerUser(user1);
+        Assertions.assertTrue(dataAccess.validAuth(authTest.authToken()));
+    }
 
     @Test
-    public void RegisterUserGood() {}
+    public void RegisterUserBad() {
+        Assertions.assertThrows(ServiceException.class, () -> {serv.registerUser(new UserData(null,null,null));});
+    }
 
     @Test
-    public void RegisterUserBad() {}
+    public void LoginUserGood() {
+        AuthData authTest = serv.loginUser(user1.username(), user1.password());
+        Assertions.assertTrue(dataAccess.validAuth(authTest.authToken()));
+    }
 
     @Test
-    public void LoginUserGood() {}
+    public void LoginUserBad() {
+        Assertions.assertThrows(ServiceException.class, () -> {serv.loginUser(null, null);});
+    }
 
     @Test
-    public void LoginUserBad() {}
+    public void LogoutUserGood() {
+        AuthData authTest = serv.loginUser(user1.username(), user1.password());
+        serv.logoutUser(authTest.authToken());
+        Assertions.assertFalse(dataAccess.validAuth(authTest.authToken()));
+    }
 
     @Test
-    public void LogoutUserGood() {}
+    public void LogoutUserBad() {
+        AuthData authTest = serv.loginUser(user1.username(), user1.password());
+        Assertions.assertThrows(ServiceException.class, () -> {serv.logoutUser("notRealAuthToken");});
+    }
 
     @Test
-    public void LogoutUserBad() {}
+    public void CreateGameGood() {
+        GameData gameTest = serv.createGame(authTest.authToken(),"testGame",null);
+        Assertions.assertEquals(dataAccess.getGame(gameTest.gameID()),gameTest);
+    }
 
     @Test
-    public void CreateGameGood() {}
+    public void CreateGameBad() {
+        Assertions.assertThrows(ServiceException.class,() -> {serv.createGame(null,"testGame",null);});
+    }
 
     @Test
-    public void CreateGameBad() {}
+    public void GetAllGamesGood() {
+        serv.createGame(authTest.authToken(),"testGame1",null);
+        serv.createGame(authTest.authToken(),"testGame2",null);
+        serv.createGame(authTest.authToken(),"testGame3",null);
+        Assertions.assertEquals(serv.getAllGames(authTest.authToken()),dataAccess.getGames()) ;
+    }
 
     @Test
-    public void GetAllGamesGood() {}
+    public void GetAllGamesBad() {
+        serv.createGame(authTest.authToken(),"testGame1",null);
+        serv.createGame(authTest.authToken(),"testGame2",null);
+        serv.createGame(authTest.authToken(),"testGame3",null);
+        Assertions.assertThrows(ServiceException.class, () -> {serv.getAllGames("notRealAuthToken");});
+    }
 
     @Test
-    public void GetAllGamesBad() {}
+    public void JoinGameGood() {
+        GameData gameTest = serv.createGame(authTest.authToken(),"testGame1",null);
+        serv.joinGame(authTest.authToken(),"WHITE", gameTest.gameID());
+        Assertions.assertEquals(authTest.username(),gameTest.whiteUsername());
+    }
 
     @Test
-    public void JoinGameGood() {}
-
-    @Test
-    public void JoinGameBad() {}
+    public void JoinGameBad() {
+        GameData gameTest = serv.createGame(authTest.authToken(),"testGame1",null);
+        Assertions.assertThrows(ServiceException.class,() -> {serv.joinGame(null,"BLACK", gameTest.gameID());});
+    }
 }

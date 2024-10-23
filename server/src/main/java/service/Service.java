@@ -56,7 +56,6 @@ public class Service {
         if(!dataAccess.validAuth(authToken)) {
             throw new ServiceException("unauthorized");
         }
-//        String newUsername = dataAccess.getUser(authToken).username();
         dataAccess.removeUser(authToken);
     }
 
