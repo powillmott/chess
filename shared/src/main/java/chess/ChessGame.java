@@ -2,6 +2,7 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 public class ChessGame {
@@ -141,22 +142,31 @@ public class ChessGame {
      */
 
     public boolean isInCheck(TeamColor teamColor) {
-        for(int i = 1; i < 9; i++) {
-            for(int j = 1; j < 9; j++) {
-                if(this.squares.getPiece(new ChessPosition(i, j)) != null) {
-                    Collection<ChessMove> temp = this.squares.getPiece(new ChessPosition(i, j)).pieceMoves(this.squares, new ChessPosition(i, j));
-                    for (ChessMove move : temp) {
-                        if (Objects.equals(move.getEndPosition(),wKing) && teamColor == TeamColor.WHITE) {
-                            return true;
-                        }
-                        if(Objects.equals(move.getEndPosition(),bKing) && teamColor == TeamColor.BLACK) {
-                            return true;
-                        }
-                    }
+        for (ChessPosition position : iterateThroughBoard()) {
+            Collection<ChessMove> temp = this.squares.getPiece(position).pieceMoves(this.squares, position);
+            for (ChessMove move : temp) {
+                if (Objects.equals(move.getEndPosition(), wKing) && teamColor == TeamColor.WHITE) {
+                    return true;
+                }
+                if (Objects.equals(move.getEndPosition(), bKing) && teamColor == TeamColor.BLACK) {
+                    return true;
                 }
             }
         }
         return false;
+    }
+
+    private List<ChessPosition> iterateThroughBoard() {
+        List<ChessPosition> piecePositions = new ArrayList<>();
+        for(int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; j++) {
+                ChessPosition tempPosition = new ChessPosition(i, j);
+                if(this.squares.getPiece(tempPosition) != null) {
+                    piecePositions.add(tempPosition);
+                }
+            }
+        }
+        return piecePositions;
     }
 
     /**
@@ -170,15 +180,13 @@ public class ChessGame {
             return false;
         }
         Collection<ChessMove> temp = new ArrayList<>();
-        for(int i = 1; i < 9; i++) {
-            for (int j = 1; j < 9; j++) {
-                if(this.squares.getPiece(new ChessPosition(i, j)) != null) {
-                    if(this.squares.getPiece(new ChessPosition(i,j)).getTeamColor() == teamColor) {
-                        temp.addAll(validMoves(new ChessPosition(i,j)));
-                    }
-                }
+        for (ChessPosition position : iterateThroughBoard()) {
+            if(this.squares.getPiece(position).getTeamColor() == teamColor) {
+                temp.addAll(validMoves(position));
             }
         }
+
+
         return temp.isEmpty();
     }
 
