@@ -37,7 +37,7 @@ public class KnightCalculator implements MovementRules {
     }
 
     private boolean moveCheck(ChessPosition position, ChessBoard board, int rowInc, int colInc, ChessGame.TeamColor color) {
-        if (position.getRow() + rowInc > 8 || position.getRow() + rowInc < 1 || position.getColumn() + colInc > 8 || position.getColumn() + colInc < 1) {
+        if (!position.inBounds(rowInc,colInc)) {
             return false;
         }
         if (board.getPiece(new ChessPosition(position.getRow() + rowInc, position.getColumn() + colInc)) == null) {

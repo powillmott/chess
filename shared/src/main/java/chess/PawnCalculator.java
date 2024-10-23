@@ -57,7 +57,7 @@ public class PawnCalculator implements MovementRules {
     }
 
     private boolean moveCheckTake(ChessPosition position, ChessBoard board, int rowInc, int colInc, ChessGame.TeamColor color) {
-        if (position.getRow() + rowInc > 8 || position.getRow() + rowInc < 1 || position.getColumn() + colInc > 8 || position.getColumn() + colInc < 1) {
+        if (!position.inBounds(rowInc, colInc)) {
             return false;
         }
         if (board.getPiece(new ChessPosition(position.getRow() + rowInc, position.getColumn() + colInc)) == null) {
@@ -67,14 +67,14 @@ public class PawnCalculator implements MovementRules {
     }
 
     private boolean moveCheckSingle(ChessPosition position, ChessBoard board, int rowInc, int colInc, ChessGame.TeamColor color) {
-        if (position.getRow() + rowInc > 8 || position.getRow() + rowInc < 1 || position.getColumn() + colInc > 8 || position.getColumn() + colInc < 1) {
+        if (!position.inBounds(rowInc,colInc)) {
             return false;
         }
         return board.getPiece(new ChessPosition(position.getRow() + rowInc, position.getColumn() + colInc)) == null;
     }
 
     private boolean moveCheckDouble(ChessPosition position, ChessBoard board, int rowInc, int colInc, ChessGame.TeamColor color) {
-        if (position.getRow() + rowInc > 8 || position.getRow() + rowInc < 1 || position.getColumn() + colInc > 8 || position.getColumn() + colInc < 1) {
+        if (!position.inBounds(rowInc,colInc)) {
             return false;
         }
         if(!((color == ChessGame.TeamColor.WHITE && position.getRow() == 2) || (color == ChessGame.TeamColor.BLACK && position.getRow() == 7))) {

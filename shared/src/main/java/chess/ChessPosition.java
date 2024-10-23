@@ -54,4 +54,17 @@ public class ChessPosition {
     public int getColumn() {
         return col;
     }
+
+    public boolean inBounds(Integer rowInc, Integer colInc) {
+        if (rowInc == null){
+            rowInc = 0;
+        }
+        if (colInc == null){
+            colInc = 0;
+        }
+        boolean colInBound = col + colInc <= 8 & col + colInc >= 1;
+        boolean rowInBound = row + rowInc <= 8 & row + rowInc >= 1;
+        return colInBound && rowInBound;
+
+    }
 }
