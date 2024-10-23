@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import passoff.model.TestUser;
 
 public class ServiceTests {
     private static DataAccess dataAccess;
@@ -31,61 +30,61 @@ public class ServiceTests {
     }
 
     @Test
-    public void ClearAllGood() {
+    public void clearAllGood() {
 
         serv.createGame(authTest.authToken(),"testGame",null);
         Assertions.assertTrue(serv.clearAll());
     }
 
     @Test
-    public void RegisterUserGood() {
+    public void registerUserGood() {
         serv.clearAll();
         authTest = serv.registerUser(user1);
         Assertions.assertTrue(dataAccess.validAuth(authTest.authToken()));
     }
 
     @Test
-    public void RegisterUserBad() {
+    public void registerUserBad() {
         Assertions.assertThrows(ServiceException.class, () -> {serv.registerUser(new UserData(null,null,null));});
     }
 
     @Test
-    public void LoginUserGood() {
+    public void loginUserGood() {
         AuthData authTest = serv.loginUser(user1.username(), user1.password());
         Assertions.assertTrue(dataAccess.validAuth(authTest.authToken()));
     }
 
     @Test
-    public void LoginUserBad() {
+    public void loginUserBad() {
         Assertions.assertThrows(ServiceException.class, () -> {serv.loginUser(null, null);});
     }
 
     @Test
-    public void LogoutUserGood() {
+    public void logoutUserGood() {
         AuthData authTest = serv.loginUser(user1.username(), user1.password());
         serv.logoutUser(authTest.authToken());
         Assertions.assertFalse(dataAccess.validAuth(authTest.authToken()));
     }
 
     @Test
-    public void LogoutUserBad() {
+    public void logoutUserBad() {
         AuthData authTest = serv.loginUser(user1.username(), user1.password());
         Assertions.assertThrows(ServiceException.class, () -> {serv.logoutUser("notRealAuthToken");});
     }
 
     @Test
-    public void CreateGameGood() {
+    public void createGameGood() {
         GameData gameTest = serv.createGame(authTest.authToken(),"testGame",null);
         Assertions.assertEquals(dataAccess.getGame(gameTest.gameID()),gameTest);
     }
 
     @Test
-    public void CreateGameBad() {
+    public void createGameBad() {
         Assertions.assertThrows(ServiceException.class,() -> {serv.createGame(null,"testGame",null);});
     }
 
     @Test
-    public void GetAllGamesGood() {
+    public void getAllGamesGood() {
         serv.createGame(authTest.authToken(),"testGame1",null);
         serv.createGame(authTest.authToken(),"testGame2",null);
         serv.createGame(authTest.authToken(),"testGame3",null);
@@ -93,7 +92,7 @@ public class ServiceTests {
     }
 
     @Test
-    public void GetAllGamesBad() {
+    public void getAllGamesBad() {
         serv.createGame(authTest.authToken(),"testGame1",null);
         serv.createGame(authTest.authToken(),"testGame2",null);
         serv.createGame(authTest.authToken(),"testGame3",null);
@@ -101,14 +100,14 @@ public class ServiceTests {
     }
 
     @Test
-    public void JoinGameGood() {
+    public void joinGameGood() {
         GameData gameTest = serv.createGame(authTest.authToken(),"testGame1",null);
         serv.joinGame(authTest.authToken(),"WHITE", gameTest.gameID());
         Assertions.assertEquals(authTest.username(),gameTest.whiteUsername());
     }
 
     @Test
-    public void JoinGameBad() {
+    public void joinGameBad() {
         GameData gameTest = serv.createGame(authTest.authToken(),"testGame1",null);
         Assertions.assertThrows(ServiceException.class,() -> {serv.joinGame(null,"BLACK", gameTest.gameID());});
     }
