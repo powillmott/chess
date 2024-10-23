@@ -21,7 +21,7 @@ public class Service {
 
     public AuthData registerUser(UserData newUser) throws ServiceException {
         AuthData newAuth;
-        if (newUser.username().isEmpty() | newUser.password().isEmpty() | newUser.email().isEmpty()) {
+        if (newUser.username() == null | newUser.password() == null | newUser.email() == null) {
             throw new ServiceException("bad request");
         } else if (dataAccess.getUser(newUser.username()) != null) {
             throw new ServiceException("already taken");

@@ -3,6 +3,7 @@ import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
 import models.AuthData;
+import models.ErrorObject;
 import models.UserData;
 import service.Service;
 import service.ServiceException;
@@ -33,10 +34,11 @@ public class RegisterHandler implements Route{
             } else if (e.getMessage().equals("already taken")) {
                 res.status(403);
             }
-            res.body("message: Error: " + e.getMessage());
+            return new Gson().toJson(new ErrorObject("Error: " + e.getMessage()));
 
         } catch (Exception e) {
             res.status(500);
+            return new Gson().toJson(new ErrorObject("Error: " + e.getMessage()));
         }
         return new Gson().toJson(result);
     }
