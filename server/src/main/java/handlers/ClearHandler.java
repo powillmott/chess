@@ -5,8 +5,14 @@ import service.Service;
 import spark.*;
 
 public class ClearHandler implements Route {
-    private final DataAccess dataAccess = new MemoryDataAccess();
-    public final service.Service serv = new Service(dataAccess);
+    public final service.Service serv;
+
+    DataAccess dataAccess;
+    public ClearHandler(DataAccess dataAccess) {
+        this.dataAccess = dataAccess;
+        serv = new Service(dataAccess);
+    }
+
 
     public Object handle(Request req, Response res){
         boolean isClear = serv.clearAll();

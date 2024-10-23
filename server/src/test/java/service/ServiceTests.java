@@ -1,4 +1,4 @@
-package student.tests;
+package service;
 
 public class ServiceTests {
 }

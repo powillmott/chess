@@ -1,9 +1,12 @@
 package service;
+import chess.ChessGame;
 import dataaccess.DataAccess;
 import models.AuthData;
+import models.GameData;
 import models.UserData;
 
 import java.util.Objects;
+import java.util.Random;
 import java.util.UUID;
 
 public class Service {
@@ -39,15 +42,27 @@ public class Service {
 
     public AuthData loginUser(String username, String password) throws ServiceException {
         AuthData newAuth = null;
-        if (Objects.equals(dataAccess.getUser(username).password(), password)) {
-            newAuth = createAuth(username);
+        if (dataAccess.getUser(username) == null) {
+            throw new ServiceException("user not found");
+        } else if (!Objects.equals(dataAccess.getUser(username).password(), password)) {
+            throw new ServiceException("wrong password");
         }
+        newAuth = createAuth(username);
         return newAuth;
     }
 
-//    public String createGame(String gameName) throws ServiceException {
-//
-//    }
+    public GameData createGame(String authToken, String gameName) throws ServiceException {
+        GameData newGame = null;
+        if (authToken == null | gameName == null) {
+            throw new ServiceException("bad request");
+        } else if (!dataAccess.validAuth(authToken)) {
+            throw new ServiceException("unauthorized");
+        } else {
+            newGame = new GameData(new Random().nextInt(10000),null,null,gameName,new ChessGame());
+        }
+        return newGame;
+    }
+
 
 
 

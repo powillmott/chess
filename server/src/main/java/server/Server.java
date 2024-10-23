@@ -24,11 +24,11 @@ public class Server {
         final DataAccess dataAccess = new MemoryDataAccess();
 
         // Register your endpoints and handle exceptions here.
-        Spark.delete("/db", new ClearHandler());
+        Spark.delete("/db", new ClearHandler(dataAccess));
 
-        Spark.post("/user", new RegisterHandler());
+        Spark.post("/user", new RegisterHandler(dataAccess));
 
-        Spark.post("/session", new LoginHandler());
+        Spark.post("/session", new LoginHandler(dataAccess));
 
         Spark.delete("/session", new LogoutHandler());
 
