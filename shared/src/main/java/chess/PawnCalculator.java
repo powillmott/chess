@@ -86,7 +86,9 @@ public class PawnCalculator implements MovementRules {
     }
 
     private void addMove(ChessPosition position, int rowInc, int colInc, ArrayList<ChessMove> temp, ChessGame.TeamColor color) {
-        if ((color == ChessGame.TeamColor.WHITE && position.getRow() + 1 == 8) || (color == ChessGame.TeamColor.BLACK && position.getRow() - 1 == 1)) {
+        boolean canWhitePromote = color == ChessGame.TeamColor.WHITE && position.getRow() + 1 == 8;
+        boolean canBlackPromote = color == ChessGame.TeamColor.BLACK && position.getRow() - 1 == 1;
+        if (canWhitePromote || canBlackPromote) {
             ChessPosition newPosition = new ChessPosition(position.getRow() + rowInc, position.getColumn() + colInc);
             temp.add(new ChessMove(position, newPosition, ChessPiece.PieceType.QUEEN));
             temp.add(new ChessMove(position, newPosition, ChessPiece.PieceType.ROOK));

@@ -94,7 +94,9 @@ public class Service {
         if (dataAccess.getGame(gameID) == null) {
             createGame(authToken, playerColor, gameID);
         }
-        if ((playerColor.equals("BLACK") & dataAccess.getGame(gameID).blackUsername() != null) | (playerColor.equals("WHITE") & dataAccess.getGame(gameID).whiteUsername() != null)) {
+        boolean blackUserAvailable = dataAccess.getGame(gameID).blackUsername() != null;
+        boolean whiteUserAvailable = dataAccess.getGame(gameID).whiteUsername() != null;
+        if ((playerColor.equals("BLACK") & blackUserAvailable) | (playerColor.equals("WHITE") & whiteUserAvailable)) {
             throw new ServiceException("already taken");
         } else {
             String userName = dataAccess.getUserName(authToken);
