@@ -29,7 +29,7 @@ public class CreateGameHandler implements Route {
         res.status(200);
         GameData result;
         try {
-            result = serv.createGame(newAuth,newGame.gameName());
+            result = serv.createGame(newAuth,newGame.gameName(),null);
         } catch (ServiceException e) {
             if (e.getMessage().equals("bad request")){
                 res.status(400);

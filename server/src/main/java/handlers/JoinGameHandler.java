@@ -1,7 +1,12 @@
 package handlers;
+import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
+import models.ErrorObject;
+import models.GameData;
+import models.joinObject;
 import service.Service;
+import service.ServiceException;
 import spark.*;
 
 public class JoinGameHandler implements Route {
@@ -14,6 +19,24 @@ public class JoinGameHandler implements Route {
     }
 
     public Object handle(Request req, Response res){
-        return "";
+        var newGame = new Gson().fromJson(req.body(), joinObject.class);
+        var newAuth = req.headers("authorization");
+        res.status(200);
+        try {
+            serv.joinGame(newAuth, newGame.getPlayerColor(), newGame.getGameID());
+        } catch (ServiceException e) {
+            if (e.getMessage().equals("bad request")) {
+                res.status(400);
+            } else if (e.getMessage().equals("unauthorized")) {
+                res.status(401);
+            } else if (e.getMessage().equals("already taken")) {
+                res.status(403);
+            }
+            return new Gson().toJson(new ErrorObject("Error: " + e.getMessage()));
+        } catch (Exception e) {
+            res.status(500);
+            return new Gson().toJson(new ErrorObject("Error: " + e.getMessage()));
+        }
+        return "{}";
     }
 }

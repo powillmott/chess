@@ -60,15 +60,19 @@ public class Service {
         dataAccess.removeUser(authToken);
     }
 
-    public GameData createGame(String authToken, String gameName) throws ServiceException {
+    public GameData createGame(String authToken, String gameName,Integer gameID) throws ServiceException {
         GameData newGame = null;
         if (authToken == null | gameName == null) {
             throw new ServiceException("bad request");
         } else if (!dataAccess.validAuth(authToken)) {
             throw new ServiceException("unauthorized");
         } else {
-            newGame = new GameData(new Random().nextInt(10000),null,null,gameName,new ChessGame());
+            if (gameID == null) {
+                gameID = new Random().nextInt(10000);
+            }
+            newGame = new GameData(gameID,null,null,gameName,new ChessGame());
         }
+        dataAccess.makeGame(newGame);
         return newGame;
     }
 
@@ -82,7 +86,22 @@ public class Service {
         return allGames;
     }
 
-
+    public void joinGame(String authToken, String playerColor, Integer gameID) throws ServiceException {
+        if (!dataAccess.validAuth(authToken)) {
+            throw new ServiceException("unauthorized");
+        } else if (gameID == null | playerColor == null) {
+            throw new ServiceException("bad request");
+        }
+        if (dataAccess.getGame(gameID) == null) {
+            createGame(authToken, playerColor, gameID);
+        }
+        if ((playerColor.equals("BLACK") & dataAccess.getGame(gameID).blackUsername() != null) | (playerColor.equals("WHITE") & dataAccess.getGame(gameID).whiteUsername() != null)) {
+            throw new ServiceException("already taken");
+        } else {
+            String userName = dataAccess.getUserName(authToken);
+            dataAccess.joinGame(gameID, playerColor, userName);
+        }
+    }
 
 
 }

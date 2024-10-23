@@ -20,4 +20,8 @@ public interface DataAccess {
     boolean validAuth(String authToken);
     void removeUser(String authToken);
     Collection<GameData> getGames();
+    GameData getGame(Integer gameID);
+    void joinGame(Integer gameID, String playerColor, String userName);
+    void makeGame(GameData game);
+    String getUserName(String authToken);
 }
