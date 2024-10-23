@@ -3,6 +3,7 @@ import models.AuthData;
 import models.GameData;
 import models.UserData;
 
+import java.util.Collection;
 import java.util.Map;
 
 public interface DataAccess {
@@ -18,4 +19,5 @@ public interface DataAccess {
     Map<String, String> getAllAuth();
     boolean validAuth(String authToken);
     void removeUser(String authToken);
+    Collection<GameData> getGames();
 }

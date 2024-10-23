@@ -5,6 +5,7 @@ import models.AuthData;
 import models.GameData;
 import models.UserData;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
@@ -69,6 +70,16 @@ public class Service {
             newGame = new GameData(new Random().nextInt(10000),null,null,gameName,new ChessGame());
         }
         return newGame;
+    }
+
+    public Collection<GameData> getAllGames(String authToken) throws ServiceException {
+        Collection<GameData> allGames;
+        if (!dataAccess.validAuth(authToken)) {
+            throw new ServiceException("unauthorized");
+        } else {
+            allGames = dataAccess.getGames();
+        }
+        return allGames;
     }
 
 
