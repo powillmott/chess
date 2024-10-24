@@ -36,7 +36,7 @@ public class KingCalculator implements MovementRules {
         return temp;
     }
 
-    private boolean moveCheck(ChessPosition position, ChessBoard board, int rowInc, int colInc, ChessGame.TeamColor color) {
+    public boolean moveCheck(ChessPosition position, ChessBoard board, int rowInc, int colInc, ChessGame.TeamColor color) {
         if (!position.inBounds(rowInc, colInc)) {
             return false;
         }
