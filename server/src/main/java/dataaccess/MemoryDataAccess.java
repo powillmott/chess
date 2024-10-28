@@ -73,8 +73,7 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public Collection<GameData> getGames() {
-        Collection<GameData> gameList = games.values();
-        return gameList;
+        return games.values();
     }
 
     @Override
