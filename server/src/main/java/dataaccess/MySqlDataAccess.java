@@ -27,7 +27,7 @@ public class MySqlDataAccess implements DataAccess{
     }
 
     @Override
-    public UserData makeUser(String userName, UserData userData) throws DataAccessException{
+    public UserData makeUser(String userName, UserData userData) {
         String statement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
         int id = executeUpdate(statement, userName, userData.password(), userData.email());
         return userData;

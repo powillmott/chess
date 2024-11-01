@@ -25,20 +25,20 @@ public class ServiceTests {
     }
 
     @BeforeEach
-    public void setUp() throws DataAccessException {
+    public void setUp() {
         serv.clearAll();
         authTest = serv.registerUser(user1);
     }
 
     @Test
-    public void clearAllGood() throws DataAccessException {
+    public void clearAllGood() {
 
         serv.createGame(authTest.authToken(),"testGame",null);
         Assertions.assertTrue(serv.clearAll());
     }
 
     @Test
-    public void registerUserGood() throws DataAccessException {
+    public void registerUserGood() {
         serv.clearAll();
         authTest = serv.registerUser(user1);
         Assertions.assertTrue(dataAccess.validAuth(authTest.authToken()));
@@ -50,7 +50,7 @@ public class ServiceTests {
     }
 
     @Test
-    public void loginUserGood() throws DataAccessException {
+    public void loginUserGood() {
         AuthData authTest = serv.loginUser(user1.username(), user1.password());
         Assertions.assertTrue(dataAccess.validAuth(authTest.authToken()));
     }
@@ -61,31 +61,31 @@ public class ServiceTests {
     }
 
     @Test
-    public void logoutUserGood() throws DataAccessException {
+    public void logoutUserGood() {
         AuthData authTest = serv.loginUser(user1.username(), user1.password());
         serv.logoutUser(authTest.authToken());
         Assertions.assertFalse(dataAccess.validAuth(authTest.authToken()));
     }
 
     @Test
-    public void logoutUserBad() throws DataAccessException {
+    public void logoutUserBad() {
         AuthData authTest = serv.loginUser(user1.username(), user1.password());
         Assertions.assertThrows(ServiceException.class, () -> {serv.logoutUser("notRealAuthToken");});
     }
 
     @Test
-    public void createGameGood() throws DataAccessException {
+    public void createGameGood() {
         GameData gameTest = serv.createGame(authTest.authToken(),"testGame",null);
         Assertions.assertEquals(dataAccess.getGame(gameTest.gameID()),gameTest);
     }
 
     @Test
-    public void createGameBad() throws DataAccessException {
+    public void createGameBad() {
         Assertions.assertThrows(ServiceException.class,() -> {serv.createGame(null,"testGame",null);});
     }
 
     @Test
-    public void getAllGamesGood() throws DataAccessException {
+    public void getAllGamesGood() {
         serv.createGame(authTest.authToken(),"testGame1",null);
         serv.createGame(authTest.authToken(),"testGame2",null);
         serv.createGame(authTest.authToken(),"testGame3",null);
@@ -93,7 +93,7 @@ public class ServiceTests {
     }
 
     @Test
-    public void getAllGamesBad() throws DataAccessException {
+    public void getAllGamesBad() {
         serv.createGame(authTest.authToken(),"testGame1",null);
         serv.createGame(authTest.authToken(),"testGame2",null);
         serv.createGame(authTest.authToken(),"testGame3",null);
@@ -101,14 +101,14 @@ public class ServiceTests {
     }
 
     @Test
-    public void joinGameGood() throws DataAccessException {
+    public void joinGameGood() {
         GameData gameTest = serv.createGame(authTest.authToken(),"testGame1",null);
         serv.joinGame(authTest.authToken(),"WHITE", gameTest.gameID());
         Assertions.assertEquals(authTest.username(),gameTest.whiteUsername());
     }
 
     @Test
-    public void joinGameBad() throws DataAccessException {
+    public void joinGameBad() {
         GameData gameTest = serv.createGame(authTest.authToken(),"testGame1",null);
         Assertions.assertThrows(ServiceException.class,() -> {serv.joinGame(null,"BLACK", gameTest.gameID());});
     }
