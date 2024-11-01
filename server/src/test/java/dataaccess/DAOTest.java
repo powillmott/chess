@@ -37,6 +37,11 @@ public class DAOTest {
     @Test
     public void makeUserGood() throws DataAccessException {
         testDataAccess.makeUser(userData.username(),userData);
+        Assertions.assertEquals(userData,testDataAccess.getUser(userData.username()));
+    }
 
+    @Test
+    public void makeAuthGood() throws DataAccessException {
+        testDataAccess.makeAuth("",userData.username());
     }
 }
