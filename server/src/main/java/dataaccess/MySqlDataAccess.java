@@ -17,8 +17,13 @@ import static java.sql.Types.NULL;
 
 public class MySqlDataAccess implements DataAccess{
 
-    public MySqlDataAccess() throws DataAccessException {
-        configureDatabase();
+    public MySqlDataAccess() {
+        try {
+            configureDatabase();
+        }
+        catch(DataAccessException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     @Override
@@ -27,7 +32,7 @@ public class MySqlDataAccess implements DataAccess{
     }
 
     @Override
-    public UserData makeUser(String userName, UserData userData) {
+    public UserData makeUser(String userName, UserData userData) throws DataAccessException {
         String statement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
         int id = executeUpdate(statement, userName, userData.password(), userData.email());
         return userData;
@@ -44,8 +49,9 @@ public class MySqlDataAccess implements DataAccess{
     }
 
     @Override
-    public void clearAllUsers() {
-
+    public void clearAllUsers() throws DataAccessException{
+        String statement = "TRUNCATE pet";
+        executeUpdate(statement);
     }
 
     @Override
@@ -135,27 +141,27 @@ public class MySqlDataAccess implements DataAccess{
     private final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS users (
-                'username' varchar(256) NOT NULL,
-                'password' varchar(256) NOT NULL,
-                'email' varchar(256) NOT NULL,
-                PRIMARY KEY ('username')
+                username varchar(256) NOT NULL,
+                password varchar(256) NOT NULL,
+                email varchar(256) NOT NULL,
+                PRIMARY KEY (username)
             )
             """,
             """
             CREATE TABLE IF NOT EXISTS games (
-                'gameID' int(11) NOT NULL AUTO_INCREMENT,
-                'whiteUsername' varchar(256) NOT NULL,
-                'blackUsername' varchar(256) NOT NULL,
-                'gameName' varchar(256) NOT NULL,
-                'game' longtext NOT NULL,
-                PRIMARY KEY ('gameID')
+                gameID int(11) NOT NULL AUTO_INCREMENT,
+                whiteUsername varchar(256) NOT NULL,
+                blackUsername varchar(256) NOT NULL,
+                gameName varchar(256) NOT NULL,
+                game longtext NOT NULL,
+                PRIMARY KEY (gameID)
             )
             """,
             """
             CREATE TABLE IF NOT EXISTS auth (
-            'authToken' varchar(256) NOT NULL,
-            'userName' varchar(256) NOT NULL,
-            PRIMARY KEY ('authToken')
+            authToken varchar(256) NOT NULL,
+            userName varchar(256) NOT NULL,
+            PRIMARY KEY (authToken)
             )
             """
     };
