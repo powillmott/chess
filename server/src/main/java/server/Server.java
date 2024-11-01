@@ -2,7 +2,8 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
-import dataaccess.MemoryDataAccess;
+import dataaccess.MySqlDataAccess;
+
 import handlers.*;
 import service.Service;
 import spark.*;
@@ -21,7 +22,7 @@ public class Server {
     public int run(int desiredPort) {
         Spark.port(desiredPort);
         Spark.staticFiles.location("web");
-        final DataAccess dataAccess = new MemoryDataAccess();
+        final DataAccess dataAccess = new MySqlDataAccess();
 
         // Register your endpoints and handle exceptions here.
         Spark.delete("/db", new ClearHandler(dataAccess));

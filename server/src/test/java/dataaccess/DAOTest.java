@@ -7,6 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DAOTest {
     static DataAccess testDataAccess;
@@ -43,5 +45,15 @@ public class DAOTest {
     @Test
     public void makeAuthGood() throws DataAccessException {
         testDataAccess.makeAuth("",userData.username());
+    }
+
+    @Test
+    public void getAllUsersGood() throws DataAccessException {
+        testDataAccess.makeUser(userData.username(),userData);
+        Map<String, UserData> result = testDataAccess.getAllUsers();
+        Map<String, UserData> expected = new HashMap<String, UserData>();
+        expected.put("testUser",userData);
+        expected.put("testUser1",existingUserData);
+        Assertions.assertEquals(expected,result);
     }
 }

@@ -40,4 +40,8 @@ public class GameData {
     public int gameID() {
         return gameID;
     }
+
+    public ChessGame game() {
+        return game;
+    }
 }

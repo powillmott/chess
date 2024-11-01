@@ -9,10 +9,7 @@ import org.eclipse.jetty.server.Authentication;
 
 import java.sql.SQLException;
 import java.sql.*;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
@@ -122,43 +119,117 @@ public class MySqlDataAccess implements DataAccess{
     }
 
     @Override
-    public Map<String, String> getAllAuth() {
-        return Map.of();
+    public Map<String, String> getAllAuth() throws DataAccessException {
+        HashMap<String, String> result = new HashMap<String, String>();
+        try (Connection conn = DatabaseManager.getConnection()) {
+            String statement = "SELECT authToken, userName FROM auth";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                try (var rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        AuthData auth = readAuth(rs);
+                        result.put(auth.authToken(), auth.username());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
+        }
+        return result;
     }
 
     @Override
-    public boolean validAuth(String authToken) {
+    public boolean validAuth(String authToken) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            String statement = "SELECT userName FROM auth WHERE authToken=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, authToken);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getString("userName") != null;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
+        }
         return false;
     }
 
     @Override
-    public void removeUser(String authToken) {
-
+    public void removeUser(String authToken) throws DataAccessException {
+        String statement = "DELETE FROM auth WHERE authToken=?";
+        executeUpdate(statement,authToken);
     }
 
     @Override
-    public Collection<GameData> getGames() {
-        return List.of();
+    public Collection<GameData> getGames() throws DataAccessException {
+        var result = new ArrayList<GameData>();
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT gameID, whiteUserName, blackUserName, gameName, game FROM games";
+            try (var ps = conn.prepareStatement(statement)) {
+                try (var rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        result.add(readGame(rs));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
+        }
+        return result;
     }
 
     @Override
-    public GameData getGame(Integer gameID) {
+    public GameData getGame(Integer gameID) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            String statement = "SELECT gameID, whiteUserName, blackUserName, gameName, game FROM games WHERE gameID=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return readGame(rs);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
+        }
         return null;
     }
 
     @Override
-    public void joinGame(Integer gameID, String playerColor, String userName) {
-
+    public void joinGame(Integer gameID, String playerColor, String userName) throws DataAccessException {
+        String statement;
+        if (playerColor.equals("WHITE")) {
+            statement = "UPDATE games Set whiteUserName=? WHERE gameID=?";
+        } else {
+            statement = "UPDATE games Set blackUserName=? WHERE gameID=?";
+        }
+        executeUpdate(statement, userName, gameID);
     }
 
     @Override
-    public void makeGame(GameData game) {
-
+    public void makeGame(GameData game) throws DataAccessException {
+        String statement = "INSERT INTO games (gameID, whiteUserName, blackUserName, gameName, game) VALUES (?, ?, ?, ?, ?)";
+        int id = executeUpdate(statement, game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), game.game());
     }
 
     @Override
-    public String getUserName(String authToken) {
-        return "";
+    public String getUserName(String authToken) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            String statement = "SELECT userName FROM auth WHERE authToken=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, authToken);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getString("userName");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
+        }
+        return null;
     }
 
 //    private Connection getConnection() throws DataAccessException {
@@ -183,6 +254,12 @@ public class MySqlDataAccess implements DataAccess{
         String gameName = rs.getString("gameName");
         ChessGame game = new Gson().fromJson(rs.getString("game"), ChessGame.class);
         return new GameData(GameID, whiteUserName, blackUserName, gameName, game);
+    }
+
+    private AuthData readAuth(ResultSet rs) throws SQLException {
+        String authToken = rs.getString("authToken");
+        String userName = rs.getString("userName");
+        return new AuthData(authToken, userName);
     }
 
     private int executeUpdate(String statement, Object... params) throws DataAccessException {
