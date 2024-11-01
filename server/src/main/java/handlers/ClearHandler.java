@@ -15,12 +15,15 @@ public class ClearHandler implements Route {
 
 
     public Object handle(Request req, Response res){
-        boolean isClear = serv.clearAll();
-        if (isClear){
-            res.status(200);
-            res.type("text/plain");
-            res.body("{}");
-        } else {
+        try {
+            boolean isClear = serv.clearAll();
+            if (isClear) {
+                res.status(200);
+                res.type("text/plain");
+                res.body("{}");
+            }
+        }
+        catch (Exception e) {
             res.status(500);
             res.type("text/plain");
             res.body("{ message: Error: game not cleared }");

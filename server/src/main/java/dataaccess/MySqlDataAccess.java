@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import models.AuthData;
 import models.GameData;
 import models.UserData;
+import org.eclipse.jetty.server.Authentication;
 
 import java.sql.SQLException;
 import java.sql.*;
@@ -27,7 +28,20 @@ public class MySqlDataAccess implements DataAccess{
     }
 
     @Override
-    public UserData getUser(String userName) {
+    public UserData getUser(String userName) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            String statement = "SELECT username, password, email FROM users WHERE username=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, userName);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return readUser(rs);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
+        }
         return null;
     }
 
@@ -40,7 +54,7 @@ public class MySqlDataAccess implements DataAccess{
 
     @Override
     public String getAuth(String userName) {
-        return "";
+        return null;
     }
 
     @Override
@@ -50,18 +64,20 @@ public class MySqlDataAccess implements DataAccess{
 
     @Override
     public void clearAllUsers() throws DataAccessException{
-        String statement = "TRUNCATE pet";
+        String statement = "TRUNCATE users";
         executeUpdate(statement);
     }
 
     @Override
-    public void clearAllAuth() {
-
+    public void clearAllAuth() throws DataAccessException {
+        String statement = "TRUNCATE auth";
+        executeUpdate(statement);
     }
 
     @Override
-    public void clearAllGames() {
-
+    public void clearAllGames() throws DataAccessException {
+        String statement = "TRUNCATE games";
+        executeUpdate(statement);
     }
 
     @Override
@@ -112,6 +128,13 @@ public class MySqlDataAccess implements DataAccess{
     @Override
     public String getUserName(String authToken) {
         return "";
+    }
+
+    private UserData readUser(ResultSet rs) throws SQLException {
+        String userName = rs.getString("username");
+        String password = rs.getString("password");
+        String email = rs.getString("email");
+        return new UserData(userName, password, email);
     }
 
     private int executeUpdate(String statement, Object... params) throws DataAccessException {
