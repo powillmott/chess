@@ -1,6 +1,7 @@
 package service;
 import chess.ChessGame;
 import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
 import models.AuthData;
 import models.GameData;
 import models.UserData;
@@ -16,14 +17,14 @@ public class Service {
     public Service(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
     }
-    public boolean clearAll() {
+    public boolean clearAll() throws DataAccessException {
         dataAccess.clearAllUsers();
         dataAccess.clearAllGames();
         dataAccess.clearAllAuth();
         return dataAccess.getAllUsers().isEmpty() & dataAccess.getAllGames().isEmpty() & dataAccess.getAllAuth().isEmpty();
     }
 
-    public AuthData registerUser(UserData newUser) throws ServiceException {
+    public AuthData registerUser(UserData newUser) throws ServiceException, DataAccessException {
         AuthData newAuth;
         if (newUser.username() == null | newUser.password() == null | newUser.email() == null) {
             throw new ServiceException("bad request");
@@ -37,11 +38,11 @@ public class Service {
         return newAuth;
     }
 
-    private AuthData createAuth(String userName){
+    private AuthData createAuth(String userName) throws DataAccessException {
         return dataAccess.makeAuth(UUID.randomUUID().toString(),userName);
     }
 
-    public AuthData loginUser(String username, String password) throws ServiceException {
+    public AuthData loginUser(String username, String password) throws ServiceException, DataAccessException {
         AuthData newAuth = null;
         if (dataAccess.getUser(username) == null) {
             throw new ServiceException("user not found");
@@ -52,14 +53,14 @@ public class Service {
         return newAuth;
     }
 
-    public void logoutUser(String authToken) throws ServiceException {
+    public void logoutUser(String authToken) throws ServiceException, DataAccessException {
         if(!dataAccess.validAuth(authToken)) {
             throw new ServiceException("unauthorized");
         }
         dataAccess.removeUser(authToken);
     }
 
-    public GameData createGame(String authToken, String gameName,Integer gameID) throws ServiceException {
+    public GameData createGame(String authToken, String gameName,Integer gameID) throws ServiceException, DataAccessException {
         GameData newGame = null;
         if (authToken == null | gameName == null) {
             throw new ServiceException("bad request");
@@ -75,7 +76,7 @@ public class Service {
         return newGame;
     }
 
-    public Collection<GameData> getAllGames(String authToken) throws ServiceException {
+    public Collection<GameData> getAllGames(String authToken) throws ServiceException, DataAccessException {
         Collection<GameData> allGames;
         if (!dataAccess.validAuth(authToken)) {
             throw new ServiceException("unauthorized");
@@ -85,7 +86,7 @@ public class Service {
         return allGames;
     }
 
-    public void joinGame(String authToken, String playerColor, Integer gameID) throws ServiceException {
+    public void joinGame(String authToken, String playerColor, Integer gameID) throws ServiceException, DataAccessException {
         if (!dataAccess.validAuth(authToken)) {
             throw new ServiceException("unauthorized");
         } else if (gameID == null | playerColor == null) {
