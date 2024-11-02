@@ -21,11 +21,6 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public String getAuth(String userName) {
-        return null;
-    }
-
-    @Override
     public AuthData makeAuth(String authToken, String userName) {
         auth.put(authToken, userName);
         return new AuthData(authToken,userName);

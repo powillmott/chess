@@ -9,7 +9,6 @@ import java.util.Map;
 public interface DataAccess {
     UserData getUser(String userName) throws DataAccessException;
     UserData makeUser(String userName, UserData userData) throws DataAccessException ;
-    String getAuth(String userName) throws DataAccessException;
     AuthData makeAuth(String authToken, String userName) throws DataAccessException;
     void clearAllUsers() throws DataAccessException;
     void clearAllAuth() throws DataAccessException;

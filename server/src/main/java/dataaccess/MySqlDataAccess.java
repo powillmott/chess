@@ -5,7 +5,6 @@ import com.google.gson.Gson;
 import models.AuthData;
 import models.GameData;
 import models.UserData;
-import org.eclipse.jetty.server.Authentication;
 
 import java.sql.SQLException;
 import java.sql.*;
@@ -48,11 +47,6 @@ public class MySqlDataAccess implements DataAccess{
         String statement = "INSERT INTO users (userName, password, email) VALUES (?, ?, ?)";
         int id = executeUpdate(statement, userName, userData.password(), userData.email());
         return userData;
-    }
-
-    @Override
-    public String getAuth(String userName) {
-        return null;
     }
 
     @Override
@@ -210,8 +204,19 @@ public class MySqlDataAccess implements DataAccess{
 
     @Override
     public void makeGame(GameData game) throws DataAccessException {
-        String statement = "INSERT INTO games (gameID, whiteUserName, blackUserName, gameName, game) VALUES (?, ?, ?, ?, ?)";
-        int id = executeUpdate(statement, game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), game.game());
+        try (Connection conn = DatabaseManager.getConnection()) {
+            String statement = "INSERT INTO games (gameID, whiteUserName, blackUserName, gameName, game) VALUES (?, ?, ?, ?, ?)";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, game.gameID());
+                ps.setString(2,game.whiteUsername());
+                ps.setString(3,game.blackUsername());
+                ps.setString(4,game.gameName());
+                ps.setString(5,new Gson().toJson(game.game()));
+                ps.executeUpdate();
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
+        }
     }
 
     @Override
@@ -269,7 +274,7 @@ public class MySqlDataAccess implements DataAccess{
                     Object param = params[i];
                     if (param instanceof String p) ps.setString(i + 1, p);
                     else if (param instanceof Integer p) ps.setInt(i + 1, p);
-                    else if (param instanceof ChessGame p) ps.setString(i + 1, p.toString());
+                    else if (param instanceof ChessGame p) ps.setString(i + 1, new Gson().toJson(p));
                     else if (param == null) ps.setNull(i + 1, NULL);
                 }
                 ps.executeUpdate();
@@ -298,8 +303,8 @@ public class MySqlDataAccess implements DataAccess{
             """
             CREATE TABLE IF NOT EXISTS games (
                 gameID int(11) NOT NULL AUTO_INCREMENT,
-                whiteUserName varchar(256) NOT NULL,
-                blackUserName varchar(256) NOT NULL,
+                whiteUserName varchar(256) NULL,
+                blackUserName varchar(256) NULL,
                 gameName varchar(256) NOT NULL,
                 game longtext NOT NULL,
                 PRIMARY KEY (gameID)
