@@ -5,6 +5,7 @@ import dataaccess.DataAccessException;
 import models.AuthData;
 import models.GameData;
 import models.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -46,7 +47,7 @@ public class Service {
         AuthData newAuth = null;
         if (dataAccess.getUser(username) == null) {
             throw new ServiceException("user not found");
-        } else if (!Objects.equals(dataAccess.getUser(username).password(), password)) {
+        } else if (!BCrypt.checkpw(password, dataAccess.getUser(username).password())) {
             throw new ServiceException("wrong password");
         }
         newAuth = createAuth(username);

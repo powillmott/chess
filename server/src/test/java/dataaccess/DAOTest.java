@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -102,12 +102,11 @@ public class DAOTest {
 
     @Test
     public void getAllGamesGood() throws DataAccessException {
-
-    }
-
-    @Test
-    public void getAllGamesBad() throws DataAccessException {
-
+        testDataAccess.makeGame(gameData);
+        HashMap<Integer, GameData> result = new HashMap<Integer, GameData>();
+        result.put(gameData.gameID(), gameData);
+        testDataAccess.getAllGames();
+        Assertions.assertEquals(result,testDataAccess.getAllGames());
     }
 
     @Test
@@ -121,58 +120,49 @@ public class DAOTest {
     }
 
     @Test
-    public void getAllUsersBad() throws DataAccessException {
-
-    }
-
-    @Test
     public void getAllAuthGood() throws DataAccessException {
-
-    }
-
-    @Test
-    public void getAllAuthBad() throws DataAccessException {
-
+        testDataAccess.makeAuth("chiasm12",userData.username());
+        Map<String, String> result = new HashMap<String, String>();
+        result.put("chiasm12",userData.username());
+        Assertions.assertEquals(result,testDataAccess.getAllAuth());
     }
 
     @Test
     public void validAuthGood() throws DataAccessException {
-
+        testDataAccess.makeAuth("chiasm12",userData.username());
+        Assertions.assertTrue(testDataAccess.validAuth("chiasm12"));
     }
 
     @Test
     public void validAuthBad() throws DataAccessException {
-
+        testDataAccess.makeAuth("chiasm12",userData.username());
+        Assertions.assertFalse(testDataAccess.validAuth(null));
     }
 
     @Test
     public void removeUserGood() throws DataAccessException {
-
-    }
-
-    @Test
-    public void removeUserBad() throws DataAccessException {
-
+        testDataAccess.makeAuth("chiasm12",userData.username());
+        testDataAccess.removeUser("chiasm12");
+        Assertions.assertEquals(new HashMap<>(),testDataAccess.getAllAuth());
     }
 
     @Test
     public void getGamesGood() throws DataAccessException {
-
-    }
-
-    @Test
-    public void getGamesBad() throws DataAccessException {
-
+        testDataAccess.makeGame(gameData);
+        var result = new ArrayList<GameData>();
+        result.add(gameData);
+        Assertions.assertEquals(result,testDataAccess.getGames());
     }
 
     @Test
     public void getGameGood() throws DataAccessException {
-
+        testDataAccess.makeGame(gameData);
+        Assertions.assertEquals(gameData,testDataAccess.getGame(gameData.gameID()));
     }
 
     @Test
     public void getGameBad() throws DataAccessException {
-
+        Assertions.assertThrows(DataAccessException.class, () -> {testDataAccess.getGame(null);});
     }
 
     @Test
