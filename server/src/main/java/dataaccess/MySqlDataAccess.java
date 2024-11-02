@@ -237,14 +237,6 @@ public class MySqlDataAccess implements DataAccess{
         return null;
     }
 
-//    private Connection getConnection() throws DataAccessException {
-//        try (Connection conn = DatabaseManager.getConnection()) {
-//            return conn;
-//        } catch (Exception e) {
-//            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
-//        }
-//    }
-
     private UserData readUser(ResultSet rs) throws SQLException {
         String userName = rs.getString("username");
         String password = rs.getString("password");
