@@ -20,10 +20,17 @@ public class ChessGame {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ChessGame chessGame = (ChessGame) o;
-        return team == chessGame.team && Objects.equals(squares, chessGame.squares) && Objects.equals(wKing, chessGame.wKing) && Objects.equals(bKing, chessGame.bKing);
+        boolean sq = Objects.equals(squares, chessGame.squares);
+        boolean wk = Objects.equals(wKing, chessGame.wKing);
+        boolean bk = Objects.equals(bKing, chessGame.bKing);
+        return team == chessGame.team && sq && wk && bk;
     }
 
     @Override
