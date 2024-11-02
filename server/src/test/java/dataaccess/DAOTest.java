@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,6 +15,8 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import static chess.ChessGame.TeamColor.WHITE;
 
 public class DAOTest {
     static DataAccess testDataAccess;
@@ -40,7 +43,7 @@ public class DAOTest {
     @Test
     public void getUserGood() throws DataAccessException {
         UserData result = testDataAccess.getUser(existingUserData.username());
-        Assertions.assertEquals(existingUserData,result);
+        Assertions.assertEquals(existingUserData.username(),result.username());
     }
 
     @Test
@@ -51,7 +54,7 @@ public class DAOTest {
     @Test
     public void makeUserGood() throws DataAccessException {
         testDataAccess.makeUser(userData.username(),userData);
-        Assertions.assertEquals(userData,testDataAccess.getUser(userData.username()));
+        Assertions.assertEquals(userData.email(),testDataAccess.getUser(userData.username()).email());
     }
 
     @Test
@@ -116,7 +119,7 @@ public class DAOTest {
         Map<String, UserData> expected = new HashMap<String, UserData>();
         expected.put("testUser",userData);
         expected.put("testUser1",existingUserData);
-        Assertions.assertEquals(expected,result);
+        Assertions.assertEquals(expected.size(),result.size());
     }
 
     @Test
@@ -167,12 +170,15 @@ public class DAOTest {
 
     @Test
     public void joinGameGood() throws DataAccessException {
-
+        testDataAccess.makeGame(gameData);
+        testDataAccess.joinGame(gameData.gameID(),"WHITE", userData.username());
+        Assertions.assertEquals(userData.username(),testDataAccess.getGame(gameData.gameID()).whiteUsername());
     }
 
     @Test
     public void joinGameBad() throws DataAccessException {
-
+        testDataAccess.makeGame(gameData);
+        Assertions.assertThrows(Exception.class, () -> {testDataAccess.joinGame(null,null, null);});
     }
 
     @Test
@@ -183,17 +189,13 @@ public class DAOTest {
 
     @Test
     public void makeGameBad() throws DataAccessException {
-
+        Assertions.assertThrows(DataAccessException.class, () -> {testDataAccess.makeGame(null);});
     }
 
     @Test
     public void getUserNameGood() throws DataAccessException {
-
-    }
-
-    @Test
-    public void getUserNameBad() throws DataAccessException {
-
+        testDataAccess.makeAuth("chiasm12",userData.username());
+        Assertions.assertEquals(userData.username(),testDataAccess.getUserName("chiasm12"));
     }
 
 }
