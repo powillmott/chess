@@ -32,7 +32,8 @@ public class Service {
         } else if (dataAccess.getUser(newUser.username()) != null) {
             throw new ServiceException("already taken");
         } else {
-            dataAccess.makeUser(newUser.username(), newUser);
+            UserData brandNewUser = new UserData(newUser.username(), BCrypt.hashpw(newUser.password(), BCrypt.gensalt()), newUser.email());
+            dataAccess.makeUser(brandNewUser.username(), brandNewUser);
             newAuth = createAuth(newUser.username());
         }
 
