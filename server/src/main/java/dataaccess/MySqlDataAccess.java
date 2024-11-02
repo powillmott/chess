@@ -259,20 +259,23 @@ public class MySqlDataAccess implements DataAccess{
         return new AuthData(authToken, userName);
     }
 
+    private void parseStatement(Connection conn, PreparedStatement ps, Object... params) throws DataAccessException, SQLException {
+        for (int i = 0; i < params.length; i++) {
+            Object param = params[i];
+            switch (param) {
+                case String p -> ps.setString(i + 1, p);
+                case Integer p -> ps.setInt(i + 1, p);
+                case ChessGame p -> ps.setString(i + 1, new Gson().toJson(p));
+                case null -> ps.setNull(i + 1, NULL);
+                default -> {}
+            }
+        }
+    }
+
     private int executeUpdate(String statement, Object... params) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
-                for (int i = 0; i < params.length; i++) {
-                    Object param = params[i];
-                    switch (param) {
-                        case String p -> ps.setString(i + 1, p);
-                        case Integer p -> ps.setInt(i + 1, p);
-                        case ChessGame p -> ps.setString(i + 1, new Gson().toJson(p));
-                        case null -> ps.setNull(i + 1, NULL);
-                        default -> {
-                        }
-                    }
-                }
+                parseStatement(conn,ps,params);
                 ps.executeUpdate();
 
                 var rs = ps.getGeneratedKeys();
