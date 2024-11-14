@@ -27,7 +27,7 @@ public class Repl {
             result.add("");
             result.add(0);
             try {
-                result.set(0,client.evalSignedOut(line));
+                result = client.evalSignedOut(line);
                 System.out.print(result.getFirst());
             } catch (Throwable e) {
                 String msg = e.toString();
