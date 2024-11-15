@@ -8,7 +8,6 @@ import static ui.EscapeSequences.*;
 public class Repl {
     private final ChessClient client;
     private final Scanner scanner = new Scanner(System.in);
-    private List<Object> result = new ArrayList<Object>();
 
 
     public Repl(String serverUrl) {client = new ChessClient(serverUrl);}
@@ -19,21 +18,20 @@ public class Repl {
 
     public void runSignedOut() {
         System.out.println("Welcome to Patrick's Chess Game! Sign in to start");
-//        System.out.println(client.help(0));
+        client.helpLoggedOut();
+        System.out.println(client.getResult().getFirst());
 
-        while (!result.getFirst().equals("exit")) {
+        while (!client.getResult().getFirst().equals("exit")) {
             System.out.print("\n" + ">>> ");
             String line = scanner.nextLine();
-            result.add("");
-            result.add(0);
             try {
-                result = client.evalSignedOut(line);
-                System.out.print(result.getFirst());
+                client.evalSignedOut(line);
+                System.out.print(client.getResult().getFirst());
             } catch (Throwable e) {
                 String msg = e.toString();
                 System.out.println(msg);
             }
-            if (result.get(1).equals(1)) {
+            if (client.getResult().get(1).equals(1)) {
                 runSignedIn();
             }
         }
@@ -41,20 +39,18 @@ public class Repl {
 
     public void runSignedIn() {
         System.out.println("You are Signed in!");
-//        System.out.println(client.help(0));
+        client.helpLoggedIn();
+        System.out.println(client.getResult().getFirst());
         List<Object> result = new ArrayList<Object>();
-        while (!result.getFirst().equals("exit")) {
+        while (client.getResult().get(1).equals(1)) {
             System.out.print("\n" + ">>> ");
             String line = scanner.nextLine();
             try {
-                result.set(0,client.evalSignedIn(line));
-                System.out.print(result.getFirst());
+                client.evalSignedIn(line);
+                System.out.print(client.getResult().getFirst());
             } catch (Throwable e) {
                 String msg = e.toString();
                 System.out.println(msg);
-            }
-            if (result.get(1).equals(1)) {
-                runSignedIn();
             }
         }
     }
