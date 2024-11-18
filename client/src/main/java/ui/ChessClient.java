@@ -139,10 +139,9 @@ public class ChessClient {
     }
 
     public String playGame(String... params) throws Exception {
-        if (params.length == 3) {
-            String authToken = params[0];
-            String playerColor = params[1];
-            int gameNumber = Integer.parseInt(params[2]);
+        if (params.length == 2) {
+            String playerColor = params[1].toUpperCase();
+            int gameNumber = Integer.parseInt(params[0]);
             int gameId = server.listGames(authToken).get(gameNumber-1).gameID();
             server.playGame(authToken,playerColor,gameId);
             result.set(1,2);
@@ -153,11 +152,10 @@ public class ChessClient {
     }
 
     public String observeGame(String... params) throws Exception {
-        if (params.length == 2) {
-            String authToken = params[0];
-            int gameNumber = Integer.parseInt(params[1]);
+        if (params.length == 1) {
+            int gameNumber = Integer.parseInt(params[0]);
             int gameId = server.listGames(authToken).get(gameNumber-1).gameID();
-            server.observeGame(authToken,null,gameId);
+//            server.observeGame(authToken,null,gameId);
             return String.format("You observed game %s", gameId);
         }
         throw new DataAccessException("Could not play game");
