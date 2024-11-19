@@ -26,7 +26,7 @@ public class ServerFacade {
             String reqData = new Gson().toJson(body);
             return makeRequest(null,reqData,"POST",url,AuthData.class);
         } catch (Exception ex) {
-            throw new Exception(ex.toString());
+            throw new Exception(String.format("was not able to log in %s",username));
         }
     }
 
@@ -53,12 +53,10 @@ public class ServerFacade {
     public int createGame(String token, String gameName) throws Exception {
         try {
             URL url = (new URI(serverUrl + "/game")).toURL();
-//            GameData body = new GameData(0,null,null,gameName,null);
-//            String reqData = new Gson().toJson(body);
             String reqData = "{ \"gameName\": \"" + gameName + "\" }";
             return makeRequest(token,reqData,"POST",url,GameData.class).gameID();
         } catch (Exception ex) {
-            throw new Exception(ex.toString());
+            throw new Exception(String.format("was unable to create game %s",gameName));
         }
     }
 
@@ -68,7 +66,7 @@ public class ServerFacade {
             GamesObject gamesObject = makeRequest(token,null,"GET",url, GamesObject.class);
             return new ArrayList<>(gamesObject.games());
         } catch (Exception ex) {
-            throw new Exception(ex.toString());
+            throw new Exception("unable to list games");
         }
 
     }
@@ -79,22 +77,9 @@ public class ServerFacade {
             JoinObject body = new JoinObject(playerColor,gameId);
             String reqData = new Gson().toJson(body);
             makeRequest(token,reqData,"PUT",url,null);
-            System.out.println("print out chessboard");
 
         } catch (Exception ex) {
-            throw new Exception(ex.toString());
-        }
-    }
-
-    public void observeGame(String token, String playerColor, int gameId) throws Exception {
-        try {
-            URL url = (new URI(serverUrl + "/game")).toURL();
-            JoinObject body = new JoinObject(playerColor,gameId);
-            String reqData = new Gson().toJson(body);
-            makeRequest(token,reqData,"PUT",url,null);
-
-        } catch (Exception ex) {
-            throw new Exception(ex.toString());
+            throw new Exception("was not able to join game");
         }
     }
 

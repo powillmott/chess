@@ -193,10 +193,10 @@ public class MySqlDataAccess implements DataAccess{
 
     @Override
     public void joinGame(Integer gameID, String playerColor, String userName) throws DataAccessException {
-        String statement;
+        String statement = "Choose either White or Black for your team";
         if (playerColor.equals("WHITE")) {
             statement = "UPDATE games Set whiteUserName=? WHERE gameID=?";
-        } else {
+        } else if (playerColor.equals("BLACK")) {
             statement = "UPDATE games Set blackUserName=? WHERE gameID=?";
         }
         executeUpdate(statement, userName, gameID);
