@@ -1,7 +1,6 @@
 package client;
 
 import dataaccess.DataAccess;
-import dataaccess.DataAccessException;
 import dataaccess.MySqlDataAccess;
 import models.AuthData;
 import org.junit.jupiter.api.*;

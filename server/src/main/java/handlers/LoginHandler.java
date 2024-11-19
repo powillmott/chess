@@ -1,7 +1,6 @@
 package handlers;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
-import dataaccess.MemoryDataAccess;
 import models.AuthData;
 import models.ErrorObject;
 import models.UserData;

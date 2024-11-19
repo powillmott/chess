@@ -4,14 +4,11 @@ import dataaccess.DataAccess;
 import models.ErrorObject;
 import models.GameData;
 import models.GamesObject;
-import server.Server;
 import service.Service;
 import service.ServiceException;
 import spark.*;
 
-import java.rmi.ServerException;
 import java.util.Collection;
-import java.util.HashMap;
 
 public class ListGamesHandler implements Route {
     public final service.Service serv;

@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import static ui.EscapeSequences.*;
 
-import dataaccess.DataAccessException;
 import models.AuthData;
 import models.GameData;
 import serverfacade.ServerFacade;
@@ -89,7 +88,7 @@ public class ChessClient {
             this.authToken = authData.authToken();
             result.set(0, String.format("You signed in as %s\n", authData.username()));
         } else {
-            throw new DataAccessException("Login failed");
+            throw new Exception("Login failed");
         }
     }
 
@@ -105,7 +104,7 @@ public class ChessClient {
             this.authToken = authData.authToken();
             result.set(0, String.format("You signed up as %s\n", authData.username()));
         } else {
-            throw new DataAccessException("Incorrect number of arguments");
+            throw new Exception("Incorrect number of arguments");
         }
     }
 
@@ -130,7 +129,7 @@ public class ChessClient {
             server.createGame(this.authToken, gameName);
             result.set(0, String.format("You created game %s", gameName));
         } else {
-            throw new DataAccessException("Could not create game");
+            throw new Exception("Could not create game");
         }
     }
 
@@ -155,7 +154,7 @@ public class ChessClient {
             System.out.println();
             result.set(0, printBoardWhite() + "\n\n" + printBoardBlack() + RESET_TEXT_COLOR);
         } else {
-            throw new DataAccessException("Could not play game");
+            throw new Exception("Could not play game");
         }
     }
 
@@ -165,7 +164,7 @@ public class ChessClient {
             int gameId = server.listGames(authToken).get(gameNumber - 1).gameID();
             result.set(0, printBoardWhite() + "\n\n" + printBoardBlack() + RESET_TEXT_COLOR);
         } else {
-            throw new DataAccessException("Could not play game");
+            throw new Exception("Could not play game");
         }
     }
 

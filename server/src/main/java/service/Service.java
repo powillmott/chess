@@ -8,7 +8,6 @@ import models.UserData;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.Collection;
-import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 

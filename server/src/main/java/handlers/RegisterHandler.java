@@ -1,15 +1,12 @@
 package handlers;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
-import dataaccess.MemoryDataAccess;
 import models.AuthData;
 import models.ErrorObject;
 import models.UserData;
 import service.Service;
 import service.ServiceException;
 import spark.*;
-
-import java.util.Map;
 
 public class RegisterHandler implements Route{
 

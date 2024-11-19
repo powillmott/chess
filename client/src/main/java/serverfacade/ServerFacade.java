@@ -50,7 +50,7 @@ public class ServerFacade {
         try {
             URL url = (new URI(serverUrl + "/game")).toURL();
             String reqData = "{ \"gameName\": \"" + gameName + "\" }";
-            return makeRequest(token,reqData,"POST",url,GameData.class).gameID();
+            return makeRequest(token,reqData,"POST",url, GameData.class).gameID();
         } catch (Exception ex) {
             throw new Exception(String.format("was unable to create game %s",gameName));
         }

@@ -1,6 +1,8 @@
 package dataaccess;
 
-import models.*;
+import models.AuthData;
+import models.GameData;
+import models.UserData;
 
 import java.util.*;
 

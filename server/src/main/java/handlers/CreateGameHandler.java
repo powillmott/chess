@@ -2,16 +2,11 @@ package handlers;
 
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
-import dataaccess.MemoryDataAccess;
-import models.AuthData;
 import models.ErrorObject;
 import models.GameData;
 import service.Service;
 import service.ServiceException;
 import spark.*;
-
-import java.io.Reader;
-import java.util.Random;
 
 
 public class CreateGameHandler implements Route {
