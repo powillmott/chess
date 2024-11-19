@@ -28,7 +28,7 @@ public class Repl {
                 client.evalSignedOut(line);
                 System.out.print(client.getResult().getFirst());
             } catch (Throwable e) {
-                String msg = e.toString();
+                String msg = e.getMessage();
                 System.out.println(msg);
             }
             if (client.getResult().get(1).equals(1)) {

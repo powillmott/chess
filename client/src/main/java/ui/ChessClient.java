@@ -1,6 +1,5 @@
 package ui;
 
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,15 +11,13 @@ import models.GameData;
 import serverfacade.ServerFacade;
 
 public class ChessClient {
-    //    private final String serverUrl;
     private final ServerFacade server;
     private String authToken;
-    private List<Object> result = new ArrayList<>();
+    private final List<Object> result = new ArrayList<>();
 
 
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
-//        this.serverUrl = serverUrl;
         this.authToken = "";
         this.result.add("");
         this.result.add(0);
@@ -156,7 +153,7 @@ public class ChessClient {
             int gameId = server.listGames(authToken).get(gameNumber - 1).gameID();
             server.playGame(authToken, playerColor, gameId);
             System.out.println();
-            result.set(0, printBoardWhite() + "\n\n" + printBoardBlack());
+            result.set(0, printBoardWhite() + "\n\n" + printBoardBlack() + RESET_TEXT_COLOR);
         } else {
             throw new DataAccessException("Could not play game");
         }
@@ -166,8 +163,7 @@ public class ChessClient {
         if (params.length == 1) {
             int gameNumber = Integer.parseInt(params[0]);
             int gameId = server.listGames(authToken).get(gameNumber - 1).gameID();
-//            server.observeGame(authToken,null,gameId);
-            result.set(0, printBoardWhite() + "\n\n" + printBoardBlack());
+            result.set(0, printBoardWhite() + "\n\n" + printBoardBlack() + RESET_TEXT_COLOR);
         } else {
             throw new DataAccessException("Could not play game");
         }

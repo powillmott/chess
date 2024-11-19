@@ -31,14 +31,10 @@ public class ServerFacade {
     }
 
     public AuthData register(String username, String password, String email) throws Exception {
-        try {
-            URL url = (new URI(serverUrl + "/user")).toURL();
-            UserData body = new UserData(username, password, email);
-            String reqData = new Gson().toJson(body);
-            return makeRequest(null,reqData,"POST",url,AuthData.class);
-        } catch (Exception ex) {
-            throw new Exception(ex.toString());
-        }
+        URL url = (new URI(serverUrl + "/user")).toURL();
+        UserData body = new UserData(username, password, email);
+        String reqData = new Gson().toJson(body);
+        return makeRequest(null,reqData,"POST",url,AuthData.class);
     }
 
     public void logout(String token) throws Exception {
@@ -72,15 +68,10 @@ public class ServerFacade {
     }
 
     public void playGame(String token, String playerColor, int gameId) throws Exception {
-        try {
-            URL url = (new URI(serverUrl + "/game")).toURL();
-            JoinObject body = new JoinObject(playerColor,gameId);
-            String reqData = new Gson().toJson(body);
-            makeRequest(token,reqData,"PUT",url,null);
-
-        } catch (Exception ex) {
-            throw new Exception("was not able to join game");
-        }
+        URL url = (new URI(serverUrl + "/game")).toURL();
+        JoinObject body = new JoinObject(playerColor,gameId);
+        String reqData = new Gson().toJson(body);
+        makeRequest(token,reqData,"PUT",url,null);
     }
 
     private <T> T makeRequest(String authToken, String reqData, String method, URL url, Class<T> responseClass) throws Exception {
@@ -97,18 +88,24 @@ public class ServerFacade {
                 reqBody.write(reqData.getBytes());
             }
             http.connect();
-            throwIfNotSuccessful(http);
-            return readBody(http,responseClass);
+            ErrorObject error = throwIfNotSuccessful(http);
+            if (error != null) {
+                throw new Exception(error.message());
+            } else {
+                return readBody(http, responseClass);
+            }
         } catch (Exception ex) {
-            throw new Exception(ex.toString());
+            throw new Exception(ex.getMessage());
         }
     }
 
-    private void throwIfNotSuccessful(HttpURLConnection http) throws Exception {
+    private ErrorObject throwIfNotSuccessful(HttpURLConnection http) throws Exception {
         int status = http.getResponseCode();
         if (status != 200) {
-            throw new Exception(String.format("Connection not successful, error code %s",status));
-        }
+            InputStream errorStream = http.getErrorStream();
+            InputStreamReader reader = new InputStreamReader(errorStream);
+            return new Gson().fromJson(reader, ErrorObject.class);
+        } else return null;
     }
 
     private static <T> T readBody(HttpURLConnection http, Class<T> responseClass) throws IOException {

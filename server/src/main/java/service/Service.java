@@ -94,12 +94,13 @@ public class Service {
         } else if (gameID == null | playerColor == null) {
             throw new ServiceException("bad request");
         }
-        if (dataAccess.getGame(gameID) == null) {
-            createGame(authToken, playerColor, gameID);
+        GameData gameData = dataAccess.getGame(gameID);
+        if (gameData == null) {
+            throw new ServiceException("no valid game to join");
         }
-        boolean blackUserAvailable = dataAccess.getGame(gameID).blackUsername() != null;
-        boolean whiteUserAvailable = dataAccess.getGame(gameID).whiteUsername() != null;
-        if ((playerColor.equals("BLACK") & blackUserAvailable) | (playerColor.equals("WHITE") & whiteUserAvailable)) {
+        boolean blackUserTaken = gameData.blackUsername() != null;
+        boolean whiteUserTaken = gameData.whiteUsername() != null;
+        if ((playerColor.equals("BLACK") && blackUserTaken) || (playerColor.equals("WHITE") && whiteUserTaken)) {
             throw new ServiceException("already taken");
         } else {
             String userName = dataAccess.getUserName(authToken);

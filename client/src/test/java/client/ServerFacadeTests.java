@@ -101,7 +101,7 @@ public class ServerFacadeTests {
     public void playGameGood() throws Exception {
         AuthData authToken = sf.login("testUser","testPassword");
         int gameID = sf.createGame(authToken.authToken(),"testGame");
-        Assertions.assertDoesNotThrow(() -> sf.playGame(authToken.authToken(),"white",1));
+        Assertions.assertDoesNotThrow(() -> sf.playGame(authToken.authToken(),"WHITE",gameID));
     }
 
     @Test
