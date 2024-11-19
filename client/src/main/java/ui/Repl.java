@@ -38,10 +38,9 @@ public class Repl {
     }
 
     public void runSignedIn() {
-        System.out.println("You are Signed in!");
         client.helpLoggedIn();
         System.out.println(client.getResult().getFirst());
-        List<Object> result = new ArrayList<Object>();
+//        List<Object> result = new ArrayList<Object>();
         while (client.getResult().get(1).equals(1)) {
             System.out.print("\n" + ">>> ");
             String line = scanner.nextLine();

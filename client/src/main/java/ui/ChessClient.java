@@ -87,7 +87,7 @@ public class ChessClient {
                 result.set(1, 1);
             }
             this.authToken = authData.authToken();
-            result.set(0, String.format("You signed in as %s", authData.username()));
+            result.set(0, String.format("You signed in as %s\n", authData.username()));
         } else {
             throw new DataAccessException("Login failed");
         }
@@ -103,7 +103,7 @@ public class ChessClient {
                 result.set(1, 1);
             }
             this.authToken = authData.authToken();
-            result.set(0, String.format("You signed up as %s", authData.username()));
+            result.set(0, String.format("You signed up as %s\n", authData.username()));
         } else {
             throw new DataAccessException("Incorrect number of arguments");
         }
