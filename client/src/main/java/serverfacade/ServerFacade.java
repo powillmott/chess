@@ -105,7 +105,9 @@ public class ServerFacade {
             InputStream errorStream = http.getErrorStream();
             InputStreamReader reader = new InputStreamReader(errorStream);
             return new Gson().fromJson(reader, ErrorObject.class);
-        } else return null;
+        } else {
+            return null;
+        }
     }
 
     private static <T> T readBody(HttpURLConnection http, Class<T> responseClass) throws IOException {
