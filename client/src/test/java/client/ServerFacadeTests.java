@@ -50,43 +50,63 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void registerGood() {
+    public void registerGood() throws Exception {
+        AuthData res = sf.register("testUser2","testPassword2","test@email2");
+        Assertions.assertTrue(testDataAccess.validAuth(res.authToken()));
     }
 
     @Test
     public void registerBad() {
+        Assertions.assertThrows(Exception.class, () -> {sf.register(null,null,null);});
     }
 
     @Test
-    public void logoutGood() {
+    public void logoutGood() throws Exception {
+        AuthData res = sf.login("testUser","testPassword");
+        sf.logout(res.authToken());
+        Assertions.assertFalse(testDataAccess.validAuth(res.authToken()));
     }
 
     @Test
     public void logoutBad() {
+        Assertions.assertThrows(Exception.class, () -> {sf.logout(null);});
     }
 
     @Test
-    public void createGameGood() {
+    public void createGameGood() throws Exception {
+        AuthData auth = sf.login("testUser","testPassword");
+        int gameID = sf.createGame(auth.authToken(),"testGame");
+        Assertions.assertEquals("testGame",testDataAccess.getGame(gameID).gameName());
     }
 
     @Test
-    public void createGameBad() {
+    public void createGameBad() throws Exception {
+        Assertions.assertThrows(Exception.class, () ->  {sf.createGame(null,null);});
     }
 
     @Test
-    public void listGamesGood() {
+    public void listGamesGood() throws Exception {
+        AuthData authToken = sf.login("testUser","testPassword");
+        sf.createGame(authToken.authToken(),"game1");
+        sf.createGame(authToken.authToken(),"game2");
+        Assertions.assertEquals(2,sf.listGames(authToken.authToken()).size());
     }
 
     @Test
     public void listGamesBad() {
+        Assertions.assertThrows(Exception.class, () -> {sf.listGames(null);});
     }
 
     @Test
-    public void playGameGood() {
+    public void playGameGood() throws Exception {
+        AuthData authToken = sf.login("testUser","testPassword");
+        int gameID = sf.createGame(authToken.authToken(),"testGame");
+        Assertions.assertDoesNotThrow(() -> sf.playGame(authToken.authToken(),"white",1));
     }
 
     @Test
     public void playGameBad() {
+        Assertions.assertThrows(Exception.class, () -> {sf.playGame(null,null,0);});
     }
 
 }
