@@ -64,7 +64,10 @@ public class ChessClient {
                 case "observe" -> observeGame(params);
                 default -> helpLoggedIn();
             }
-        } catch (Exception ex) {
+        } catch (NumberFormatException ex) {
+            result.set(0, "not a valid game number");
+        } catch
+        (Exception ex) {
             result.set(0, ex.getMessage());
         }
     }
@@ -113,8 +116,9 @@ public class ChessClient {
                 - logout - logs out user
                 - create <NAME> - creates a game
                 - list - lists games
-                - play - <ID> [WHITE|BLACK] - joins game
-                - observe <ID> - observes a game""");
+                - play - <GAME NUMBER> [WHITE|BLACK] - joins game
+                - observe <GAME NUMBER> - observes a game
+                - help - show menu""");
     }
 
     public void logout() throws Exception {
@@ -150,9 +154,16 @@ public class ChessClient {
         if (params.length == 2) {
             String playerColor = params[1].toUpperCase();
             int gameNumber = Integer.parseInt(params[0]);
-            int gameId = server.listGames(authToken).get(gameNumber - 1).gameID();
-            server.playGame(authToken, playerColor, gameId);
-            System.out.println();
+            if (gameNumber > server.listGames(authToken).size() || gameNumber < 0) {
+                throw new Exception("not a valid game");
+            } else if (!(playerColor.equals("WHITE") || playerColor.equals("BLACK"))) {
+                throw new Exception("choose either white or black for your team");
+            } else {
+                int gameId = server.listGames(authToken).get(gameNumber - 1).gameID();
+                server.playGame(authToken, playerColor, gameId);
+            }
+
+//            System.out.println();
             result.set(0, printBoardWhite() + "\n\n" + printBoardBlack() + RESET_TEXT_COLOR);
         } else {
             throw new Exception("Could not play game");
@@ -162,6 +173,9 @@ public class ChessClient {
     public void observeGame(String... params) throws Exception {
         if (params.length == 1) {
             int gameNumber = Integer.parseInt(params[0]);
+            if (gameNumber > server.listGames(authToken).size() || gameNumber < 0) {
+                throw new Exception("not a valid game");
+            }
             int gameId = server.listGames(authToken).get(gameNumber - 1).gameID();
             result.set(0, printBoardWhite() + "\n\n" + printBoardBlack() + RESET_TEXT_COLOR);
         } else {
@@ -169,34 +183,38 @@ public class ChessClient {
         }
     }
 
-    private String printBoardWhite() {
+    private String printBoardBlack() {
         String startSetting = SET_TEXT_BOLD + SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY;
         String header = startSetting + "    h  g  f  e  d  c  b  a    " + RESET_BG_COLOR + "\n";
         StringBuilder board = new StringBuilder(header);
         boolean wb = true;
         for (int i = 1; i < 9; i++) {
-            wb = isWb(startSetting, board, wb, i);
+            wb = isWb(startSetting, board, wb, i,false);
         }
         board.append(header);
         return board.toString();
     }
 
-    private String printBoardBlack() {
+    private String printBoardWhite() {
         String startSetting = SET_TEXT_BOLD + SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY;
         String header = startSetting + "    a  b  c  d  e  f  g  h    " + RESET_BG_COLOR + "\n";
         StringBuilder board = new StringBuilder(header);
         boolean wb = true;
         for (int i = 8; i > 0; i--) {
-            wb = isWb(startSetting, board, wb, i);
+            wb = isWb(startSetting, board, wb, i,true);
         }
         board.append(header);
         return board.toString();
     }
 
-    private boolean isWb(String startSetting, StringBuilder board, boolean wb, int i) {
+    private boolean isWb(String startSetting, StringBuilder board, boolean wb, int i, boolean w) {
         String input;
         if (i == 1 | i == 8) {
-            input = "RNBKQBNR";
+            if (!w) {
+                input = "RNBKQBNR";
+            } else {
+                input = "RNBQKBNR";
+            }
         } else if (i == 2 | i == 7) {
             input = "PPPPPPPP";
         } else {
