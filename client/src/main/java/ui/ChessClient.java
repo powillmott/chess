@@ -5,6 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 import static ui.EscapeSequences.*;
 
+import chess.ChessBoard;
+import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import models.AuthData;
 import models.GameData;
 import serverfacade.ServerFacade;
@@ -185,11 +189,18 @@ public class ChessClient {
 
     private String printBoardBlack() {
         String startSetting = SET_TEXT_BOLD + SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY;
+        ChessBoard newBoard = new ChessBoard();
+        newBoard.resetBoard();
         String header = startSetting + "    h  g  f  e  d  c  b  a    " + RESET_BG_COLOR + "\n";
         StringBuilder board = new StringBuilder(header);
         boolean wb = true;
         for (int i = 1; i < 9; i++) {
-            wb = isWb(startSetting, board, wb, i,false);
+            board.append(startSetting).append(" ").append(i).append(" ");
+            for (int j = 8; j > 0; j--){
+                wb = applyPiece(newBoard, board, wb, i, j);
+            }
+            wb = colorSwitch(wb, board);
+            board.append(startSetting).append(" ").append(i).append(" ").append(RESET_BG_COLOR).append("\n");
         }
         board.append(header);
         return board.toString();
@@ -197,43 +208,84 @@ public class ChessClient {
 
     private String printBoardWhite() {
         String startSetting = SET_TEXT_BOLD + SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY;
+        ChessBoard newBoard = new ChessBoard();
+        newBoard.resetBoard();
         String header = startSetting + "    a  b  c  d  e  f  g  h    " + RESET_BG_COLOR + "\n";
         StringBuilder board = new StringBuilder(header);
         boolean wb = true;
         for (int i = 8; i > 0; i--) {
-            wb = isWb(startSetting, board, wb, i,true);
+            board.append(startSetting).append(" ").append(i).append(" ");
+            for (int j = 1; j < 9; j++){
+                wb = applyPiece(newBoard, board, wb, i, j);
+            }
+            wb = colorSwitch(wb, board);
+            board.append(startSetting).append(" ").append(i).append(" ").append(RESET_BG_COLOR).append("\n");
         }
         board.append(header);
         return board.toString();
     }
 
-    private boolean isWb(String startSetting, StringBuilder board, boolean wb, int i, boolean w) {
-        String input;
-        if (i == 1 | i == 8) {
-            if (!w) {
-                input = "RNBKQBNR";
-            } else {
-                input = "RNBQKBNR";
-            }
-        } else if (i == 2 | i == 7) {
-            input = "PPPPPPPP";
-        } else {
-            input = "        ";
-        }
-        board.append(startSetting).append(" ").append(i).append(" ");
-        for (int j = 0; j < input.length(); j++) {
-            if (i == 1 | i == 2) {
+    private boolean applyPiece(ChessBoard newBoard, StringBuilder board, boolean wb, int i, int j) {
+        wb = colorSwitch(wb, board);
+        ChessPiece piece = newBoard.getPiece(new ChessPosition(i,j));
+        if (piece == null){
+            board.append("   ");
+        } else{
+            if (piece.getTeamColor() == ChessGame.TeamColor.WHITE){
                 board.append(SET_TEXT_COLOR_RED);
-            } else {
+            } else if (piece.getTeamColor() == ChessGame.TeamColor.BLACK){
                 board.append(SET_TEXT_COLOR_BLUE);
             }
-            wb = colorSwitch(wb, board);
-            board.append(" ").append(input.charAt(j)).append(" ");
+            board.append(" ").append(pieceSymbol(piece.getPieceType())).append(" ");
         }
-        wb = colorSwitch(wb, board);
-        board.append(startSetting).append(" ").append(i).append(" ").append(RESET_BG_COLOR).append("\n");
         return wb;
     }
+
+    private String pieceSymbol(ChessPiece.PieceType pieceType) {
+        String symbol = "";
+        if (pieceType == ChessPiece.PieceType.KING) {
+            symbol = "K";
+        } else if (pieceType == ChessPiece.PieceType.QUEEN) {
+            symbol = "Q";
+        } else if (pieceType == ChessPiece.PieceType.BISHOP) {
+            symbol = "B";
+        } else if (pieceType == ChessPiece.PieceType.ROOK) {
+            symbol = "R";
+        } else if (pieceType == ChessPiece.PieceType.KNIGHT) {
+            symbol = "N";
+        } else if (pieceType == ChessPiece.PieceType.PAWN) {
+            symbol = "P";
+        }
+        return symbol;
+    }
+
+//    private boolean isWb(String startSetting, StringBuilder board, boolean wb, int i, boolean w) {
+//        String input;
+//        if (i == 1 | i == 8) {
+//            if (!w) {
+//                input = "RNBKQBNR";
+//            } else {
+//                input = "RNBQKBNR";
+//            }
+//        } else if (i == 2 | i == 7) {
+//            input = "PPPPPPPP";
+//        } else {
+//            input = "        ";
+//        }
+//        board.append(startSetting).append(" ").append(i).append(" ");
+//        for (int j = 0; j < input.length(); j++) {
+//            if (i == 1 | i == 2) {
+//                board.append(SET_TEXT_COLOR_RED);
+//            } else {
+//                board.append(SET_TEXT_COLOR_BLUE);
+//            }
+//            wb = colorSwitch(wb, board);
+//            board.append(" ").append(input.charAt(j)).append(" ");
+//        }
+//        wb = colorSwitch(wb, board);
+//        board.append(startSetting).append(" ").append(i).append(" ").append(RESET_BG_COLOR).append("\n");
+//        return wb;
+//    }
 
     private boolean colorSwitch(boolean wb, StringBuilder board) {
         if (wb) {
