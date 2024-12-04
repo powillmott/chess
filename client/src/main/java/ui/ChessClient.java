@@ -76,6 +76,25 @@ public class ChessClient {
         }
     }
 
+    public void evalInGame(String input) {
+        var tokens = input.toLowerCase().split(" ");
+        var cmd = (tokens.length > 0) ? tokens[0] : "help";
+        var params = Arrays.copyOfRange(tokens, 1, tokens.length);
+        try {
+            switch (cmd) {
+                case "redraw chess board" -> {}
+                case "leave" -> {}
+                case "make move" -> {}
+                case "resign" -> {}
+                case "highlight legal move" -> {}
+                default -> helpInGame();
+            }
+        } catch
+        (Exception ex) {
+            result.set(0, ex.getMessage());
+        }
+    }
+
     public void helpLoggedOut() {
         result.set(0, """
                 - login <USERNAME> <PASSWORD> - to play chess
@@ -152,6 +171,16 @@ public class ChessClient {
             }
         }
         result.set(0, str);
+    }
+
+    public void helpInGame() {
+        result.set(2, """
+                - redraw chess board
+                - leave - leaves game
+                - make move - makes move on turn
+                - resign - forfeits and ends game
+                - highlight legal moves - shows legal moves
+                - help - show options""");
     }
 
     public void playGame(String... params) throws Exception {
@@ -259,33 +288,6 @@ public class ChessClient {
         return symbol;
     }
 
-//    private boolean isWb(String startSetting, StringBuilder board, boolean wb, int i, boolean w) {
-//        String input;
-//        if (i == 1 | i == 8) {
-//            if (!w) {
-//                input = "RNBKQBNR";
-//            } else {
-//                input = "RNBQKBNR";
-//            }
-//        } else if (i == 2 | i == 7) {
-//            input = "PPPPPPPP";
-//        } else {
-//            input = "        ";
-//        }
-//        board.append(startSetting).append(" ").append(i).append(" ");
-//        for (int j = 0; j < input.length(); j++) {
-//            if (i == 1 | i == 2) {
-//                board.append(SET_TEXT_COLOR_RED);
-//            } else {
-//                board.append(SET_TEXT_COLOR_BLUE);
-//            }
-//            wb = colorSwitch(wb, board);
-//            board.append(" ").append(input.charAt(j)).append(" ");
-//        }
-//        wb = colorSwitch(wb, board);
-//        board.append(startSetting).append(" ").append(i).append(" ").append(RESET_BG_COLOR).append("\n");
-//        return wb;
-//    }
 
     private boolean colorSwitch(boolean wb, StringBuilder board) {
         if (wb) {

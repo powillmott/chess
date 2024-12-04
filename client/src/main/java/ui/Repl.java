@@ -20,7 +20,6 @@ public class Repl {
         System.out.println("Welcome to Patrick's Chess Game! Sign in to start");
         client.helpLoggedOut();
         System.out.println(client.getResult().getFirst());
-
         while (!client.getResult().getFirst().equals("exit")) {
             System.out.print("\n" + ">>> ");
             String line = scanner.nextLine();
@@ -40,12 +39,30 @@ public class Repl {
     public void runSignedIn() {
         client.helpLoggedIn();
         System.out.println(client.getResult().getFirst());
-//        List<Object> result = new ArrayList<Object>();
         while (client.getResult().get(1).equals(1)) {
             System.out.print("\n" + ">>> ");
             String line = scanner.nextLine();
             try {
                 client.evalSignedIn(line);
+                System.out.print(client.getResult().getFirst());
+            } catch (Throwable e) {
+                String msg = e.toString();
+                System.out.println(msg);
+            }
+            if (client.getResult().get(1).equals(2)) {
+                runInGame();
+            }
+        }
+    }
+
+    public void runInGame() {
+        client.helpInGame();
+        System.out.println(client.getResult().getFirst());
+        while (client.getResult().get(1).equals(2)) {
+            System.out.print("\n" + ">>> ");
+            String line = scanner.nextLine();
+            try {
+                client.evalInGame(line);
                 System.out.print(client.getResult().getFirst());
             } catch (Throwable e) {
                 String msg = e.toString();
