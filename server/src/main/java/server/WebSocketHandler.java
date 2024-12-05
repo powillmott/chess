@@ -30,7 +30,7 @@ public class WebSocketHandler {
             case CONNECT -> connect(action,session);
             case MAKE_MOVE -> makeMove(message,session);
             case LEAVE -> leaveGame(action,session);
-//            case RESIGN -> resignGame();
+            case RESIGN -> resignGame(action,session);
         }
     }
 
@@ -54,9 +54,21 @@ public class WebSocketHandler {
         sessions.removeSessionFromGame(action.getGameID(),session);
         String message = String.format("%s left the game", dataAccess.getUserName(action.getAuthToken()));
         broadcastMessage(action.getGameID(),message,session);
+        sessions.removeSession(session);
     }
 
     private void resignGame(UserGameCommand action, Session session) throws Exception {
+        String username = dataAccess.getUserName(action.getAuthToken());
+        if (dataAccess.getGame(action.getGameID()).blackUsername() == username | dataAccess.getGame(action.getGameID()).whiteUsername() == username) {
+
+            String message = String.format("%s forfeits the game. Game is over", dataAccess.getUserName(action.getAuthToken()));
+            sendMessage(message, session);
+            broadcastMessage(action.getGameID(), message, session);
+            for (Session ses : sessions.getSessionForGame(action.getGameID())) {
+                sessions.removeSessionFromGame(action.getGameID(), ses);
+            }
+            sessions.removeSession(session);
+        } else sendMessage("only players can forfeit",session);
 
     }
 

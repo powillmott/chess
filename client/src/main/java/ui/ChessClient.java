@@ -87,9 +87,9 @@ public class ChessClient {
         try {
             switch (cmd) {
                 case "redraw chess board" -> {}
-                case "leave" -> {}
+                case "leave" -> leaveGame();
                 case "make move" -> {}
-                case "resign" -> {}
+                case "resign" -> resignGame();
                 case "highlight legal move" -> {}
                 default -> helpInGame();
             }
@@ -178,7 +178,7 @@ public class ChessClient {
     }
 
     public void helpInGame() {
-        result.set(2, """
+        result.set(0, """
                 - redraw chess board
                 - leave - leaves game
                 - make move - makes move on turn
@@ -206,6 +206,7 @@ public class ChessClient {
 
 //            System.out.println();
             result.set(0, printBoardWhite() + "\n\n" + printBoardBlack() + RESET_TEXT_COLOR);
+            result.set(1,2);
         } else {
             throw new Exception("Could not play game");
         }
@@ -223,6 +224,7 @@ public class ChessClient {
             ws = new WebSocketFacade(serverUrl);
             ws.send(new Gson().toJson(body));
             result.set(0, printBoardWhite() + "\n\n" + printBoardBlack() + RESET_TEXT_COLOR);
+            result.set(1,2);
         } else {
             throw new Exception("Could not play game");
         }
@@ -312,9 +314,15 @@ public class ChessClient {
         return wb;
     }
 
-//    public void leaveGame() {
-//        UserGameCommand body = new UserGameCommand(UserGameCommand.CommandType.CONNECT,this.authToken,gameId);
-//        ws = new WebSocketFacade(serverUrl);
-//        ws.send(new Gson().toJson(body));
-//    }
+    public void leaveGame() throws Exception {
+        UserGameCommand body = new UserGameCommand(UserGameCommand.CommandType.CONNECT,this.authToken,this.gameID);
+        ws.send(new Gson().toJson(body));
+        result.set(1,1);
+    }
+
+    public void resignGame() throws Exception {
+        UserGameCommand body = new UserGameCommand(UserGameCommand.CommandType.RESIGN,this.authToken,this.gameID);
+        ws.send(new Gson().toJson(body));
+        result.set(1,1);
+    }
 }
