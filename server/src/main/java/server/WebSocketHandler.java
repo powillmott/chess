@@ -1,5 +1,6 @@
 package server;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import org.eclipse.jetty.websocket.api.Session;
@@ -8,6 +9,9 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import service.Service;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
+import websocket.messages.LoadGame;
+import websocket.messages.Notification;
+import websocket.messages.ServerMessage;
 
 import java.util.Map;
 import java.util.Objects;
@@ -44,6 +48,8 @@ public class WebSocketHandler {
             message = message + "as white player";
         }
         broadcastMessage(action.getGameID(),message,session);
+        LoadGame game = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME,new ChessGame());
+        session.getRemote().sendString(new Gson().toJson(game));
     }
 
     private void makeMove(String message, Session session) throws Exception {
@@ -59,7 +65,9 @@ public class WebSocketHandler {
 
     private void resignGame(UserGameCommand action, Session session) throws Exception {
         String username = dataAccess.getUserName(action.getAuthToken());
-        if (dataAccess.getGame(action.getGameID()).blackUsername() == username | dataAccess.getGame(action.getGameID()).whiteUsername() == username) {
+        boolean isBlack = Objects.equals(dataAccess.getGame(action.getGameID()).blackUsername(), username);
+        boolean isWhite = Objects.equals(dataAccess.getGame(action.getGameID()).whiteUsername(), username);
+        if (isBlack | isWhite) {
 
             String message = String.format("%s forfeits the game. Game is over", dataAccess.getUserName(action.getAuthToken()));
             sendMessage(message, session);
@@ -73,14 +81,16 @@ public class WebSocketHandler {
     }
 
     private void sendMessage(String message, Session session) throws Exception {
-        session.getRemote().sendString(message);
+        Notification not = new Notification(ServerMessage.ServerMessageType.NOTIFICATION,message);
+        session.getRemote().sendString(new Gson().toJson(not));
     }
 
     private void broadcastMessage(Integer gameID, String message, Session sessionException) throws Exception {
         Set<Session> gameSession = sessions.getSessionForGame(gameID);
+        Notification not = new Notification(ServerMessage.ServerMessageType.NOTIFICATION,message);
         for (Session ses : sessions.getSessionForGame(gameID)) {
             if (ses != sessionException) {
-                ses.getRemote().sendString(message);
+                ses.getRemote().sendString(new Gson().toJson(not));
             }
         }
     }

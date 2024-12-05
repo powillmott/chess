@@ -1,6 +1,7 @@
 package websocket;
 
 import com.google.gson.Gson;
+import websocket.messages.Notification;
 import websocket.messages.ServerMessage;
 
 import javax.websocket.*;
@@ -23,8 +24,13 @@ public class WebSocketFacade extends Endpoint{
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    System.out.println(message);
                     ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
+                    switch (notification.getServerMessageType()) {
+                        case NOTIFICATION -> {
+                            Notification not = new Gson().fromJson(message,Notification.class);
+                            System.out.println(not.getMessage());
+                        }
+                    }
                 }
             });
         } catch (Exception e) {
