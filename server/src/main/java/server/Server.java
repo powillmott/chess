@@ -26,6 +26,8 @@ public class Server {
 //        final DataAccess dataAccess = new MemoryDataAccess();
 
         // Register your endpoints and handle exceptions here.
+        Spark.webSocket("/ws",new WebSocketHandler(dataAccess));
+
         Spark.delete("/db", new ClearHandler(dataAccess));
 
         Spark.post("/user", new RegisterHandler(dataAccess));

@@ -9,18 +9,25 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import com.google.gson.Gson;
 import models.AuthData;
 import models.GameData;
 import serverfacade.ServerFacade;
+import websocket.WebSocketFacade;
+import websocket.commands.UserGameCommand;
 
 public class ChessClient {
     private final ServerFacade server;
     private String authToken;
     private final List<Object> result = new ArrayList<>();
+    private WebSocketFacade ws;
+    private String serverUrl;
+    private int gameID;
 
 
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
+        this.serverUrl = serverUrl;
         this.authToken = "";
         this.result.add("");
         this.result.add(0);
@@ -59,10 +66,7 @@ public class ChessClient {
                     logout();
                     result.set(1, 0);
                 }
-                case "play" -> {
-                    playGame(params);
-//                    result.set(1, 2);
-                }
+                case "play" -> playGame(params);
                 case "create" -> createGame(params);
                 case "list" -> listGames();
                 case "observe" -> observeGame(params);
@@ -193,7 +197,11 @@ public class ChessClient {
                 throw new Exception("choose either white or black for your team");
             } else {
                 int gameId = server.listGames(authToken).get(gameNumber - 1).gameID();
+                this.gameID = gameId;
                 server.playGame(authToken, playerColor, gameId);
+                UserGameCommand body = new UserGameCommand(UserGameCommand.CommandType.CONNECT,this.authToken,gameId);
+                ws = new WebSocketFacade(serverUrl);
+                ws.send(new Gson().toJson(body));
             }
 
 //            System.out.println();
@@ -210,6 +218,10 @@ public class ChessClient {
                 throw new Exception("not a valid game");
             }
             int gameId = server.listGames(authToken).get(gameNumber - 1).gameID();
+            this.gameID = gameID;
+            UserGameCommand body = new UserGameCommand(UserGameCommand.CommandType.CONNECT,this.authToken,gameId);
+            ws = new WebSocketFacade(serverUrl);
+            ws.send(new Gson().toJson(body));
             result.set(0, printBoardWhite() + "\n\n" + printBoardBlack() + RESET_TEXT_COLOR);
         } else {
             throw new Exception("Could not play game");
@@ -299,4 +311,10 @@ public class ChessClient {
         }
         return wb;
     }
+
+//    public void leaveGame() {
+//        UserGameCommand body = new UserGameCommand(UserGameCommand.CommandType.CONNECT,this.authToken,gameId);
+//        ws = new WebSocketFacade(serverUrl);
+//        ws.send(new Gson().toJson(body));
+//    }
 }
