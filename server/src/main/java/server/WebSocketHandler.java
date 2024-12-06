@@ -87,15 +87,11 @@ public class WebSocketHandler {
         if (!(isBlack | isWhite)) {
             sendError("Error: only players can forfeit", session);
         } else if (!isCurrentGame) {
-//            broadcastMessage(action.getGameID(),"Error: game is already finished, cannot forfeit", session);
             sendError("Error: game is already finished, cannot forfeit", session);
         } else {
             String message = String.format("%s forfeits the game. Game is over", dataAccess.getUserName(action.getAuthToken()));
             sendMessage(message, session);
             broadcastMessage(action.getGameID(), message, session);
-//            for (Session ses : sessions.getSessionForGame(action.getGameID())) {
-//                sessions.removeSessionFromGame(action.getGameID(), ses);
-//            }
             game.game().setCurrentGame(false);
             dataAccess.updateGame(game.game(),action.getGameID());
         }
