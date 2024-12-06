@@ -77,10 +77,12 @@ public class WebSocketHandler {
         } else if (checkIfTurn(gameData,userName)) {
             String errorMessage = "Error: not your turn";
             sendError(errorMessage, session);
+        }else if (!gameData.game().isCurrentGame()) {
+            String errorMessage = "Error: game is over, cannot make move";
+            sendError(errorMessage, session);
         } else {
             if (!gameData.game().validMoves(chessMove.getStartPosition()).contains(chessMove)) {
-                String errorMessage = "Error, invalid move, please try again";
-                sendError(errorMessage, session);
+
             }
         }
     }
