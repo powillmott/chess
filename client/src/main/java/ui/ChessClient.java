@@ -335,9 +335,13 @@ public class ChessClient implements NotificationHandler {
     }
 
     public void resignGame() throws Exception {
-        UserGameCommand body = new UserGameCommand(UserGameCommand.CommandType.RESIGN, this.authToken, this.gameID);
-        result.set(0,"");
-        ws.send(new Gson().toJson(body));
+        System.out.print("Are you sure you want to resign? <Y> <N>");
+        String line = new Scanner(System.in).nextLine();
+        if (line.equalsIgnoreCase("Y")) {
+            UserGameCommand body = new UserGameCommand(UserGameCommand.CommandType.RESIGN, this.authToken, this.gameID);
+            result.set(0,"");
+            ws.send(new Gson().toJson(body));
+        }
     }
 
     public String getUserName() {

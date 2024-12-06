@@ -24,22 +24,30 @@ import java.util.Objects;
 @WebSocket
 public class WebSocketHandler {
     private DataAccess dataAccess;
+    private ChessGame.TeamColor otherColor;
+
 
     public WebSocketHandler(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
+        this.otherColor = null;
+
     }
 
     private final WebSocketSessions sessions = new WebSocketSessions();
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws Exception {
-        System.out.println(message);
-        UserGameCommand action = new Gson().fromJson(message, UserGameCommand.class);
-        switch (action.getCommandType()) {
-            case CONNECT -> connect(action,session);
-            case MAKE_MOVE -> makeMove(message,session);
-            case LEAVE -> leaveGame(action,session);
-            case RESIGN -> resignGame(action,session);
+        try {
+            System.out.println(message);
+            UserGameCommand action = new Gson().fromJson(message, UserGameCommand.class);
+            switch (action.getCommandType()) {
+                case CONNECT -> connect(action, session);
+                case MAKE_MOVE -> makeMove(message, session);
+                case LEAVE -> leaveGame(action, session);
+                case RESIGN -> resignGame(action, session);
+            }
+        } catch (Exception e) {
+            sendError(e.getMessage(),session);
         }
     }
 
@@ -50,8 +58,10 @@ public class WebSocketHandler {
             String message = String.format("%s joined the game", username);
             if (Objects.equals(dataAccess.getGame(action.getGameID()).blackUsername(), username)) {
                 message = message + " as black player";
+                this.otherColor = ChessGame.TeamColor.WHITE;
             } else if (Objects.equals(dataAccess.getGame(action.getGameID()).whiteUsername(), username)) {
                 message = message + " as white player";
+                this.otherColor = ChessGame.TeamColor.BLACK;
             }
             broadcastMessage(action.getGameID(), message, session);
             GameData game = dataAccess.getGame(action.getGameID());
@@ -83,21 +93,34 @@ public class WebSocketHandler {
         }else if (!gameData.game().isCurrentGame()) {
             String errorMessage = "Error: game is over, cannot make move";
             sendError(errorMessage, session);
-//        }else if (){
-//
         } else {
             gameData.game().makeMove(chessMove);
             dataAccess.updateGame(gameData.game(),action.getGameID());
-            ChessPiece piece = gameData.game().getBoard().getPiece(chessMove.getStartPosition());
-            ChessPiece.PieceType pieceType = null;
-            if (piece != null) {
-                pieceType = piece.getPieceType();
-            }
+            ChessPiece piece = gameData.game().getBoard().getPiece(chessMove.getEndPosition());
+            ChessPiece.PieceType pieceType;
+            pieceType = piece.getPieceType();
             ChessPosition piecePos = chessMove.getEndPosition();
-            String broadcastMessage = String.format("%s moved %s to %s", dataAccess.getUserName(action.getAuthToken()),pieceType,piecePos);
+            String bMessage = String.format("%s moved %s to %s", dataAccess.getUserName(action.getAuthToken()),pieceType,piecePos);
             sendGame(gameData,session);
             broadcastGame(action.getGameID(),gameData,session);
-            broadcastMessage(action.getGameID(),broadcastMessage,session);
+            broadcastMessage(action.getGameID(),bMessage,session);
+            if (gameData.game().isInCheckmate(this.otherColor)) {
+                bMessage = String.format("Checkmate! %s wins",userName);
+                broadcastMessage(action.getGameID(),bMessage,session);
+                sendMessage(bMessage,session);
+                gameData.game().setCurrentGame(false);
+                dataAccess.updateGame(gameData.game(),action.getGameID());
+            } else if (gameData.game().isInStalemate(this.otherColor)) {
+                bMessage = "Stalemate! it's a draw";
+                broadcastMessage(action.getGameID(),bMessage,session);
+                sendMessage(bMessage,session);
+                gameData.game().setCurrentGame(false);
+                dataAccess.updateGame(gameData.game(),action.getGameID());
+            } else if (gameData.game().isInCheck(this.otherColor)) {
+                bMessage = "You are in check";
+                broadcastMessage(action.getGameID(),bMessage,session);
+            }
+
         }
     }
 
@@ -177,10 +200,5 @@ public class WebSocketHandler {
     private void sendError(String errorMessage, Session session) throws Exception {
         Error error = new Error(ServerMessage.ServerMessageType.ERROR,errorMessage);
         session.getRemote().sendString(new Gson().toJson(error));
-    }
-
-    @OnWebSocketError
-    public void webErrorCatching(Session session, Throwable cause) throws Exception {
-        sendError(cause.getMessage(),session);
     }
 }
