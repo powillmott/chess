@@ -1,14 +1,17 @@
 package server;
 
+import chess.ChessBoard;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
+import models.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import service.Service;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
+import websocket.messages.Error;
 import websocket.messages.LoadGame;
 import websocket.messages.Notification;
 import websocket.messages.ServerMessage;
@@ -39,17 +42,22 @@ public class WebSocketHandler {
     }
 
     private void connect(UserGameCommand action, Session session) throws Exception {
-        sessions.addSessionToGame(action.getGameID(),session);
-        String username = dataAccess.getUserName(action.getAuthToken());
-        String message = String.format("%s joined the game", username);
-        if(Objects.equals(dataAccess.getGame(action.getGameID()).blackUsername(), username)) {
-            message = message + "as black player";
-        } else if (Objects.equals(dataAccess.getGame(action.getGameID()).whiteUsername(), username)) {
-            message = message + "as white player";
+        if (dataAccess.validAuth(action.getAuthToken()) && dataAccess.getGame(action.getGameID()) != null) {
+            sessions.addSessionToGame(action.getGameID(), session);
+            String username = dataAccess.getUserName(action.getAuthToken());
+            String message = String.format("%s joined the game", username);
+            if (Objects.equals(dataAccess.getGame(action.getGameID()).blackUsername(), username)) {
+                message = message + " as black player";
+            } else if (Objects.equals(dataAccess.getGame(action.getGameID()).whiteUsername(), username)) {
+                message = message + " as white player";
+            }
+            broadcastMessage(action.getGameID(), message, session);
+            GameData game = dataAccess.getGame(action.getGameID());
+            sendGame(game, session);
+        } else {
+            String errorMessage = "Error, could not connect, please ensure game number is valid";
+            sendError(errorMessage, session);
         }
-        broadcastMessage(action.getGameID(),message,session);
-        LoadGame game = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME,new ChessGame());
-        session.getRemote().sendString(new Gson().toJson(game));
     }
 
     private void makeMove(String message, Session session) throws Exception {
@@ -58,6 +66,7 @@ public class WebSocketHandler {
 
     private void leaveGame(UserGameCommand action, Session session) throws Exception {
         sessions.removeSessionFromGame(action.getGameID(),session);
+        String username = dataAccess.getUserName(action.getAuthToken());
         String message = String.format("%s left the game", dataAccess.getUserName(action.getAuthToken()));
         broadcastMessage(action.getGameID(),message,session);
         sessions.removeSession(session);
@@ -65,19 +74,23 @@ public class WebSocketHandler {
 
     private void resignGame(UserGameCommand action, Session session) throws Exception {
         String username = dataAccess.getUserName(action.getAuthToken());
+        GameData game = dataAccess.getGame(action.getGameID());
         boolean isBlack = Objects.equals(dataAccess.getGame(action.getGameID()).blackUsername(), username);
         boolean isWhite = Objects.equals(dataAccess.getGame(action.getGameID()).whiteUsername(), username);
-        if (isBlack | isWhite) {
-
+        if (!isBlack | !isWhite) {
+            sendError("Error: only players can forfeit", session);
+        } else if (!game.game().isCurrentGame()) {
+            sendError("Error: game is already finished, cannot forfeit", session);
+        } else {
             String message = String.format("%s forfeits the game. Game is over", dataAccess.getUserName(action.getAuthToken()));
             sendMessage(message, session);
             broadcastMessage(action.getGameID(), message, session);
             for (Session ses : sessions.getSessionForGame(action.getGameID())) {
                 sessions.removeSessionFromGame(action.getGameID(), ses);
             }
-            sessions.removeSession(session);
-        } else sendMessage("only players can forfeit",session);
-
+            game.game().setCurrentGame(false);
+            dataAccess.updateGame(game.game(),action.getGameID());
+        }
     }
 
     private void sendMessage(String message, Session session) throws Exception {
@@ -94,4 +107,16 @@ public class WebSocketHandler {
             }
         }
     }
+
+    private void sendGame(GameData game, Session session) throws Exception {
+        LoadGame loadGame= new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME,game);
+        session.getRemote().sendString(new Gson().toJson(loadGame));
+    }
+
+    private void sendError(String errorMessage, Session session) throws Exception {
+        Error error = new Error(ServerMessage.ServerMessageType.ERROR,errorMessage);
+        session.getRemote().sendString(new Gson().toJson(error));
+    }
+
+
 }

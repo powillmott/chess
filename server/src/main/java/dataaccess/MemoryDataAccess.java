@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import models.AuthData;
 import models.GameData;
 import models.UserData;
@@ -96,6 +97,11 @@ public class MemoryDataAccess implements DataAccess {
     @Override
     public String getUserName(String authToken) {
         return auth.get(authToken);
+    }
+
+    @Override
+    public void updateGame(ChessGame chess, Integer gameID) throws DataAccessException {
+
     }
 
 }

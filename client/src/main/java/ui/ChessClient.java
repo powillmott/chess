@@ -15,10 +15,13 @@ import models.GameData;
 import serverfacade.ServerFacade;
 import websocket.WebSocketFacade;
 import websocket.commands.UserGameCommand;
+import websocket.messages.LoadGame;
+import websocket.messages.ServerMessage;
 
 public class ChessClient {
     private final ServerFacade server;
     private String authToken;
+    private String userName;
     private final List<Object> result = new ArrayList<>();
     private WebSocketFacade ws;
     private String serverUrl;
@@ -29,6 +32,7 @@ public class ChessClient {
         server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
         this.authToken = "";
+        this.userName = "";
         this.result.add("");
         this.result.add(0);
     }
@@ -109,9 +113,9 @@ public class ChessClient {
 
     public void login(String... params) throws Exception {
         if (params.length == 2) {
-            String username = params[0];
+            this.userName = params[0];
             String password = params[1];
-            AuthData authData = server.login(username, password);
+            AuthData authData = server.login(this.userName, password);
             if (!authData.authToken().isEmpty()) {
                 result.set(1, 1);
             }
@@ -124,10 +128,10 @@ public class ChessClient {
 
     public void register(String... params) throws Exception {
         if (params.length == 3) {
-            String username = params[0];
+            this.userName = params[0];
             String password = params[1];
             String email = params[2];
-            AuthData authData = server.register(username, password, email);
+            AuthData authData = server.register(this.userName, password, email);
             if (!authData.authToken().isEmpty()) {
                 result.set(1, 1);
             }
@@ -200,12 +204,11 @@ public class ChessClient {
                 this.gameID = gameId;
                 server.playGame(authToken, playerColor, gameId);
                 UserGameCommand body = new UserGameCommand(UserGameCommand.CommandType.CONNECT,this.authToken,gameId);
-                ws = new WebSocketFacade(serverUrl);
+                ws = new WebSocketFacade(this, serverUrl);
                 ws.send(new Gson().toJson(body));
             }
 
 //            System.out.println();
-            result.set(0, printBoardWhite() + "\n\n" + printBoardBlack() + RESET_TEXT_COLOR);
             result.set(1,2);
         } else {
             throw new Exception("Could not play game");
@@ -221,19 +224,16 @@ public class ChessClient {
             int gameId = server.listGames(authToken).get(gameNumber - 1).gameID();
             this.gameID = gameID;
             UserGameCommand body = new UserGameCommand(UserGameCommand.CommandType.CONNECT,this.authToken,gameId);
-            ws = new WebSocketFacade(serverUrl);
+            ws = new WebSocketFacade(this, serverUrl);
             ws.send(new Gson().toJson(body));
-            result.set(0, printBoardWhite() + "\n\n" + printBoardBlack() + RESET_TEXT_COLOR);
             result.set(1,2);
         } else {
             throw new Exception("Could not play game");
         }
     }
 
-    private String printBoardBlack() {
-        String startSetting = SET_TEXT_BOLD + SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY;
-        ChessBoard newBoard = new ChessBoard();
-        newBoard.resetBoard();
+    public String printBoardBlack(ChessBoard newBoard) {
+        String startSetting = "\n" + SET_TEXT_BOLD + SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY;
         String header = startSetting + "    h  g  f  e  d  c  b  a    " + RESET_BG_COLOR + "\n";
         StringBuilder board = new StringBuilder(header);
         boolean wb = true;
@@ -246,13 +246,11 @@ public class ChessClient {
             board.append(startSetting).append(" ").append(i).append(" ").append(RESET_BG_COLOR).append("\n");
         }
         board.append(header);
-        return board.toString();
+        return board + RESET_TEXT_COLOR;
     }
 
-    private String printBoardWhite() {
-        String startSetting = SET_TEXT_BOLD + SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY;
-        ChessBoard newBoard = new ChessBoard();
-        newBoard.resetBoard();
+    public String printBoardWhite(ChessBoard newBoard) {
+        String startSetting = "\n" + SET_TEXT_BOLD + SET_TEXT_COLOR_BLACK + SET_BG_COLOR_LIGHT_GREY;
         String header = startSetting + "    a  b  c  d  e  f  g  h    " + RESET_BG_COLOR + "\n";
         StringBuilder board = new StringBuilder(header);
         boolean wb = true;
@@ -265,7 +263,7 @@ public class ChessClient {
             board.append(startSetting).append(" ").append(i).append(" ").append(RESET_BG_COLOR).append("\n");
         }
         board.append(header);
-        return board.toString();
+        return board + RESET_TEXT_COLOR;
     }
 
     private boolean applyPiece(ChessBoard newBoard, StringBuilder board, boolean wb, int i, int j) {
@@ -324,5 +322,9 @@ public class ChessClient {
         UserGameCommand body = new UserGameCommand(UserGameCommand.CommandType.RESIGN,this.authToken,this.gameID);
         ws.send(new Gson().toJson(body));
         result.set(1,1);
+    }
+
+    public String getUserName() {
+        return userName;
     }
 }

@@ -63,7 +63,7 @@ public class Repl {
             String line = scanner.nextLine();
             try {
                 client.evalInGame(line);
-                System.out.print(client.getResult().getFirst());
+//                System.out.print(client.getResult().getFirst());
             } catch (Throwable e) {
                 String msg = e.toString();
                 System.out.println(msg);

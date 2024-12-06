@@ -1,4 +1,5 @@
 package dataaccess;
+import chess.ChessGame;
 import models.AuthData;
 import models.GameData;
 import models.UserData;
@@ -23,4 +24,5 @@ public interface DataAccess {
     void joinGame(Integer gameID, String playerColor, String userName) throws DataAccessException;
     void makeGame(GameData game) throws DataAccessException;
     String getUserName(String authToken) throws DataAccessException;
+    void updateGame(ChessGame chess, Integer gameID) throws DataAccessException;
 }

@@ -11,10 +11,12 @@ public class ChessGame {
     private ChessBoard squares;
     private ChessPosition wKing = new ChessPosition(1, 5);
     private ChessPosition bKing = new ChessPosition(8, 5);
+    private boolean currentGame;
     public ChessGame() {
         team = TeamColor.WHITE;
         squares = new ChessBoard();
-        squares.resetBoard();;
+        squares.resetBoard();
+        this.currentGame = true;
 
     }
 
@@ -257,5 +259,13 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return this.squares;
+    }
+
+    public boolean isCurrentGame() {
+        return currentGame;
+    }
+
+    public void setCurrentGame(boolean currentGame) {
+        this.currentGame = currentGame;
     }
 }

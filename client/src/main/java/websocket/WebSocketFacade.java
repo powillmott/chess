@@ -1,6 +1,11 @@
 package websocket;
 
+import chess.ChessBoard;
+import chess.ChessGame;
 import com.google.gson.Gson;
+import models.GameData;
+import ui.ChessClient;
+import websocket.messages.LoadGame;
 import websocket.messages.Notification;
 import websocket.messages.ServerMessage;
 
@@ -11,8 +16,10 @@ import java.net.URI;
 public class WebSocketFacade extends Endpoint{
     Session session;
     NotificationHandler notificationHandler;
+    private ChessClient client;
 
-    public WebSocketFacade(String url) throws Exception {
+    public WebSocketFacade(ChessClient client, String url) throws Exception {
+        this.client = client;
         try {
             url = url.replace("http","ws");
             URI socketURI = new URI(url + "/ws");
@@ -30,12 +37,24 @@ public class WebSocketFacade extends Endpoint{
                             Notification not = new Gson().fromJson(message,Notification.class);
                             System.out.println(not.getMessage());
                         }
+                        case LOAD_GAME -> loadGame(new Gson().fromJson(message,LoadGame.class));
                     }
                 }
             });
         } catch (Exception e) {
             System.out.println("Error connecting to websocket: "+e.getMessage());
         }
+    }
+
+    private void loadGame(LoadGame loadGame) {
+        GameData gameData = loadGame.getGameData();
+        String boardPrintOut;
+        if (this.client.getUserName().equals(gameData.blackUsername())) {
+            boardPrintOut = this.client.printBoardBlack(gameData.game().getBoard());
+        } else {
+            boardPrintOut = this.client.printBoardWhite(gameData.game().getBoard());
+        }
+        System.out.println(boardPrintOut);
     }
 
     @Override

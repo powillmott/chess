@@ -237,6 +237,20 @@ public class MySqlDataAccess implements DataAccess{
         return null;
     }
 
+    @Override
+    public void updateGame(ChessGame chess, Integer gameID) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            String statement = "UPDATE games SET game ? WHERE gameID = ?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1,new Gson().toJson(chess));
+                ps.setInt(2,gameID);
+                ps.executeUpdate();
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
+        }
+    }
+
     private UserData readUser(ResultSet rs) throws SQLException {
         String userName = rs.getString("username");
         String password = rs.getString("password");
