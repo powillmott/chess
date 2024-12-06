@@ -350,10 +350,19 @@ public class ChessClient implements NotificationHandler {
 
     public void makeMove(String... params) throws Exception {
         if (params.length >= 4) {
-            int startRow = Integer.parseInt(params[0]);
-            int startCol = Integer.parseInt(params[1]);
-            int endRow = Integer.parseInt(params[2]);
-            int endCol = Integer.parseInt(params[3]);
+            int startRow;
+            int startCol;
+            int endRow;
+            int endCol;
+            try {
+                startRow = Integer.parseInt(params[0]);
+                startCol = Integer.parseInt(params[1]);
+                endRow = Integer.parseInt(params[2]);
+                endCol = Integer.parseInt(params[3]);
+            } catch (NumberFormatException e) {
+                System.out.println("please input chess position as numbers");
+                return;
+            }
             ChessPiece.PieceType promotionPiece = null;
             if (params.length == 5) {
                 promotionPiece = promotion(params[4]);

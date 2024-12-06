@@ -58,10 +58,8 @@ public class WebSocketHandler {
             String message = String.format("%s joined the game", username);
             if (Objects.equals(dataAccess.getGame(action.getGameID()).blackUsername(), username)) {
                 message = message + " as black player";
-                this.otherColor = ChessGame.TeamColor.WHITE;
             } else if (Objects.equals(dataAccess.getGame(action.getGameID()).whiteUsername(), username)) {
                 message = message + " as white player";
-                this.otherColor = ChessGame.TeamColor.BLACK;
             }
             broadcastMessage(action.getGameID(), message, session);
             GameData game = dataAccess.getGame(action.getGameID());
@@ -100,12 +98,20 @@ public class WebSocketHandler {
             ChessPiece.PieceType pieceType;
             pieceType = piece.getPieceType();
             ChessPosition piecePos = chessMove.getEndPosition();
-            String bMessage = String.format("%s moved %s to %s", dataAccess.getUserName(action.getAuthToken()),pieceType,piecePos);
+            String bMessage = String.format("%s moved %s to %s", userName,pieceType,piecePos);
             sendGame(gameData,session);
             broadcastGame(action.getGameID(),gameData,session);
             broadcastMessage(action.getGameID(),bMessage,session);
+            String otherUserName = null;
+            if (Objects.equals(dataAccess.getGame(action.getGameID()).blackUsername(), userName)) {
+                otherUserName = gameData.whiteUsername();
+                this.otherColor = ChessGame.TeamColor.WHITE;
+            } else if (Objects.equals(dataAccess.getGame(action.getGameID()).whiteUsername(), userName)) {
+                otherUserName = gameData.blackUsername();
+                this.otherColor = ChessGame.TeamColor.BLACK;
+            }
             if (gameData.game().isInCheckmate(this.otherColor)) {
-                bMessage = String.format("Checkmate! %s wins",userName);
+                bMessage = String.format("Checkmate! %s wins, %s looses",userName, otherUserName);
                 broadcastMessage(action.getGameID(),bMessage,session);
                 sendMessage(bMessage,session);
                 gameData.game().setCurrentGame(false);
@@ -117,8 +123,9 @@ public class WebSocketHandler {
                 gameData.game().setCurrentGame(false);
                 dataAccess.updateGame(gameData.game(),action.getGameID());
             } else if (gameData.game().isInCheck(this.otherColor)) {
-                bMessage = "You are in check";
+                bMessage = String.format("%s is in check",otherUserName);
                 broadcastMessage(action.getGameID(),bMessage,session);
+                sendMessage(bMessage,session);
             }
 
         }
