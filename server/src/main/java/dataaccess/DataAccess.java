@@ -25,4 +25,5 @@ public interface DataAccess {
     void makeGame(GameData game) throws DataAccessException;
     String getUserName(String authToken) throws DataAccessException;
     void updateGame(ChessGame chess, Integer gameID) throws DataAccessException;
+    void playerLeavesGame(GameData gameData, ChessGame.TeamColor color, Integer gameID) throws DataAccessException;
 }

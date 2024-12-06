@@ -18,8 +18,7 @@ public class WebSocketFacade extends Endpoint{
     NotificationHandler notificationHandler;
     private ChessClient client;
 
-    public WebSocketFacade(ChessClient client, String url) throws Exception {
-        this.client = client;
+    public WebSocketFacade(NotificationHandler client, String url) throws Exception {
         try {
             url = url.replace("http","ws");
             URI socketURI = new URI(url + "/ws");
@@ -32,29 +31,12 @@ public class WebSocketFacade extends Endpoint{
                 @Override
                 public void onMessage(String message) {
                     ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
-                    switch (notification.getServerMessageType()) {
-                        case NOTIFICATION -> {
-                            Notification not = new Gson().fromJson(message,Notification.class);
-                            System.out.println(not.getMessage());
-                        }
-                        case LOAD_GAME -> loadGame(new Gson().fromJson(message,LoadGame.class));
-                    }
+                    client.notify(notification, message);
                 }
             });
         } catch (Exception e) {
             System.out.println("Error connecting to websocket: "+e.getMessage());
         }
-    }
-
-    private void loadGame(LoadGame loadGame) {
-        GameData gameData = loadGame.getGameData();
-        String boardPrintOut;
-        if (this.client.getUserName().equals(gameData.blackUsername())) {
-            boardPrintOut = this.client.printBoardBlack(gameData.game().getBoard());
-        } else {
-            boardPrintOut = this.client.printBoardWhite(gameData.game().getBoard());
-        }
-        System.out.println(boardPrintOut);
     }
 
     @Override

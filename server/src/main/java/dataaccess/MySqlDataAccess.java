@@ -242,6 +242,17 @@ public class MySqlDataAccess implements DataAccess {
         executeUpdate(statement, chess, gameID);
     }
 
+    @Override
+    public void playerLeavesGame(GameData gameData, ChessGame.TeamColor color, Integer gameID) throws DataAccessException {
+        String statement;
+        if (color.equals(ChessGame.TeamColor.WHITE)) {
+            statement = "UPDATE games SET whiteUserName = null WHERE gameID = ?";
+        } else {
+            statement = "UPDATE games SET blackUserName = null WHERE gameID = ?";
+        }
+        executeUpdate(statement, gameID);
+    }
+
     private UserData readUser(ResultSet rs) throws SQLException {
         String userName = rs.getString("username");
         String password = rs.getString("password");

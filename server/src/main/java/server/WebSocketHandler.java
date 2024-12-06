@@ -1,14 +1,14 @@
 package server;
 
-import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import models.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import service.Service;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.Error;
@@ -16,9 +16,8 @@ import websocket.messages.LoadGame;
 import websocket.messages.Notification;
 import websocket.messages.ServerMessage;
 
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
+
 @WebSocket
 public class WebSocketHandler {
     private DataAccess dataAccess;
@@ -62,6 +61,38 @@ public class WebSocketHandler {
 
     private void makeMove(String message, Session session) throws Exception {
         MakeMoveCommand action = new Gson().fromJson(message, MakeMoveCommand.class);
+        String userName = dataAccess.getUserName(action.getAuthToken());
+        ChessMove chessMove = action.getMove();
+        GameData gameData = dataAccess.getGame(action.getGameID());
+
+        if (!dataAccess.validAuth(action.getAuthToken())) {
+            String errorMessage = "Authorization Error";
+            sendError(errorMessage, session);
+        } else if (dataAccess.getGame(action.getGameID()) == null) {
+            String errorMessage = "Valid Game Error";
+            sendError(errorMessage, session);
+        } else if (!(gameData.blackUsername().equals(userName) || gameData.whiteUsername().equals(userName))) {
+            String errorMessage = "Error: only players can make moves";
+            sendError(errorMessage, session);
+        } else if (checkIfTurn(gameData,userName)) {
+            String errorMessage = "Error: not your turn";
+            sendError(errorMessage, session);
+        } else {
+            if (!gameData.game().validMoves(chessMove.getStartPosition()).contains(chessMove)) {
+                String errorMessage = "Error, invalid move, please try again";
+                sendError(errorMessage, session);
+            }
+        }
+    }
+
+    private boolean checkIfTurn(GameData gameData, String userName) {
+        boolean isTurn = false;
+        if (gameData.blackUsername().equals(userName)) {
+            isTurn = gameData.blackUsername().equals(userName);
+        } else {
+            isTurn = gameData.whiteUsername().equals(userName);
+        }
+        return isTurn;
     }
 
     private void leaveGame(UserGameCommand action, Session session) throws Exception {
@@ -70,8 +101,10 @@ public class WebSocketHandler {
         GameData gameData = dataAccess.getGame(action.getGameID());
         if (username.equals(gameData.whiteUsername())) {
             gameData.setWhiteUsername(null);
+            dataAccess.playerLeavesGame(gameData, ChessGame.TeamColor.WHITE, action.getGameID());
         } else if (username.equals(gameData.blackUsername())) {
             gameData.setBlackUsername(null);
+            dataAccess.playerLeavesGame(gameData, ChessGame.TeamColor.BLACK, action.getGameID());
         }
         String message = String.format("%s left the game", dataAccess.getUserName(action.getAuthToken()));
         broadcastMessage(action.getGameID(),message,session);

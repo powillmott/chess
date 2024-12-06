@@ -104,4 +104,9 @@ public class MemoryDataAccess implements DataAccess {
 
     }
 
+    @Override
+    public void playerLeavesGame(GameData gameData, ChessGame.TeamColor color, Integer gameID) throws DataAccessException {
+
+    }
+
 }
