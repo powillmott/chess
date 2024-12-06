@@ -93,9 +93,9 @@ public class WebSocketHandler {
             String message = String.format("%s forfeits the game. Game is over", dataAccess.getUserName(action.getAuthToken()));
             sendMessage(message, session);
             broadcastMessage(action.getGameID(), message, session);
-            for (Session ses : sessions.getSessionForGame(action.getGameID())) {
-                sessions.removeSessionFromGame(action.getGameID(), ses);
-            }
+//            for (Session ses : sessions.getSessionForGame(action.getGameID())) {
+//                sessions.removeSessionFromGame(action.getGameID(), ses);
+//            }
             game.game().setCurrentGame(false);
             dataAccess.updateGame(game.game(),action.getGameID());
         }
