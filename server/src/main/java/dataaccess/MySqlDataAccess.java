@@ -13,13 +13,12 @@ import java.util.*;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
 
-public class MySqlDataAccess implements DataAccess{
+public class MySqlDataAccess implements DataAccess {
 
     public MySqlDataAccess() {
         try {
             configureDatabase();
-        }
-        catch(DataAccessException e) {
+        } catch (DataAccessException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -57,7 +56,7 @@ public class MySqlDataAccess implements DataAccess{
     }
 
     @Override
-    public void clearAllUsers() throws DataAccessException{
+    public void clearAllUsers() throws DataAccessException {
         String statement = "TRUNCATE users";
         executeUpdate(statement);
     }
@@ -152,7 +151,7 @@ public class MySqlDataAccess implements DataAccess{
     @Override
     public void removeUser(String authToken) throws DataAccessException {
         String statement = "DELETE FROM auth WHERE authToken=?";
-        executeUpdate(statement,authToken);
+        executeUpdate(statement, authToken);
     }
 
     @Override
@@ -208,10 +207,10 @@ public class MySqlDataAccess implements DataAccess{
             String statement = "INSERT INTO games (gameID, whiteUserName, blackUserName, gameName, game) VALUES (?, ?, ?, ?, ?)";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.setInt(1, game.gameID());
-                ps.setString(2,game.whiteUsername());
-                ps.setString(3,game.blackUsername());
-                ps.setString(4,game.gameName());
-                ps.setString(5,new Gson().toJson(game.game()));
+                ps.setString(2, game.whiteUsername());
+                ps.setString(3, game.blackUsername());
+                ps.setString(4, game.gameName());
+                ps.setString(5, new Gson().toJson(game.game()));
                 ps.executeUpdate();
             }
         } catch (Exception e) {
@@ -239,16 +238,8 @@ public class MySqlDataAccess implements DataAccess{
 
     @Override
     public void updateGame(ChessGame chess, Integer gameID) throws DataAccessException {
-        try (Connection conn = DatabaseManager.getConnection()) {
-            String statement = "UPDATE games SET game ? WHERE gameID = ?";
-            try (PreparedStatement ps = conn.prepareStatement(statement)) {
-                ps.setString(1,new Gson().toJson(chess));
-                ps.setInt(2,gameID);
-                ps.executeUpdate();
-            }
-        } catch (Exception e) {
-            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
-        }
+        String statement = "UPDATE games SET game = ? WHERE gameID = ?";
+        executeUpdate(statement, chess, gameID);
     }
 
     private UserData readUser(ResultSet rs) throws SQLException {

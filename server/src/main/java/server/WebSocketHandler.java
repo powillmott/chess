@@ -67,6 +67,12 @@ public class WebSocketHandler {
     private void leaveGame(UserGameCommand action, Session session) throws Exception {
         sessions.removeSessionFromGame(action.getGameID(),session);
         String username = dataAccess.getUserName(action.getAuthToken());
+        GameData gameData = dataAccess.getGame(action.getGameID());
+        if (username.equals(gameData.whiteUsername())) {
+            gameData.setWhiteUsername(null);
+        } else if (username.equals(gameData.blackUsername())) {
+            gameData.setBlackUsername(null);
+        }
         String message = String.format("%s left the game", dataAccess.getUserName(action.getAuthToken()));
         broadcastMessage(action.getGameID(),message,session);
         sessions.removeSession(session);
@@ -77,9 +83,11 @@ public class WebSocketHandler {
         GameData game = dataAccess.getGame(action.getGameID());
         boolean isBlack = Objects.equals(dataAccess.getGame(action.getGameID()).blackUsername(), username);
         boolean isWhite = Objects.equals(dataAccess.getGame(action.getGameID()).whiteUsername(), username);
-        if (!isBlack | !isWhite) {
+        boolean isCurrentGame = game.game().isCurrentGame();
+        if (!(isBlack | isWhite)) {
             sendError("Error: only players can forfeit", session);
-        } else if (!game.game().isCurrentGame()) {
+        } else if (!isCurrentGame) {
+//            broadcastMessage(action.getGameID(),"Error: game is already finished, cannot forfeit", session);
             sendError("Error: game is already finished, cannot forfeit", session);
         } else {
             String message = String.format("%s forfeits the game. Game is over", dataAccess.getUserName(action.getAuthToken()));
@@ -99,7 +107,6 @@ public class WebSocketHandler {
     }
 
     private void broadcastMessage(Integer gameID, String message, Session sessionException) throws Exception {
-        Set<Session> gameSession = sessions.getSessionForGame(gameID);
         Notification not = new Notification(ServerMessage.ServerMessageType.NOTIFICATION,message);
         for (Session ses : sessions.getSessionForGame(gameID)) {
             if (ses != sessionException) {
@@ -117,6 +124,5 @@ public class WebSocketHandler {
         Error error = new Error(ServerMessage.ServerMessageType.ERROR,errorMessage);
         session.getRemote().sendString(new Gson().toJson(error));
     }
-
 
 }
