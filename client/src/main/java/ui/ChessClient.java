@@ -13,9 +13,7 @@ import websocket.NotificationHandler;
 import websocket.WebSocketFacade;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
-import websocket.messages.LoadGame;
-import websocket.messages.Notification;
-import websocket.messages.ServerMessage;
+import websocket.messages.*;
 
 public class ChessClient implements NotificationHandler {
     private final ServerFacade server;
@@ -223,6 +221,7 @@ public class ChessClient implements NotificationHandler {
                 throw new Exception("not a valid game");
             }
             int gameId = server.listGames(authToken).get(gameNumber - 1).gameID();
+            this.gameID = gameId;
             UserGameCommand body = new UserGameCommand(UserGameCommand.CommandType.CONNECT, this.authToken, gameId);
             ws = new WebSocketFacade(this, serverUrl);
             ws.send(new Gson().toJson(body));
@@ -337,6 +336,7 @@ public class ChessClient implements NotificationHandler {
 
     public void resignGame() throws Exception {
         UserGameCommand body = new UserGameCommand(UserGameCommand.CommandType.RESIGN, this.authToken, this.gameID);
+        result.set(0,"");
         ws.send(new Gson().toJson(body));
     }
 
@@ -408,8 +408,8 @@ public class ChessClient implements NotificationHandler {
             }
             case LOAD_GAME -> loadGame(new Gson().fromJson(message,LoadGame.class));
             case ERROR -> {
-                Error err = new Gson().fromJson(message,Error.class);
-                System.out.println(err.getMessage());
+                websocket.messages.Error err = new Gson().fromJson(message,websocket.messages.Error.class);
+                System.out.println(err.getErrorMessage());
             }
         }
     }

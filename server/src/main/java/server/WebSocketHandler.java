@@ -2,11 +2,13 @@ package server;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPiece;
 import chess.ChessPosition;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import models.GameData;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import websocket.commands.MakeMoveCommand;
@@ -16,6 +18,7 @@ import websocket.messages.LoadGame;
 import websocket.messages.Notification;
 import websocket.messages.ServerMessage;
 
+import java.io.IOException;
 import java.util.Objects;
 
 @WebSocket
@@ -74,25 +77,36 @@ public class WebSocketHandler {
         } else if (!(gameData.blackUsername().equals(userName) || gameData.whiteUsername().equals(userName))) {
             String errorMessage = "Error: only players can make moves";
             sendError(errorMessage, session);
-        } else if (checkIfTurn(gameData,userName)) {
+        } else if (!checkIfTurn(gameData,userName)) {
             String errorMessage = "Error: not your turn";
             sendError(errorMessage, session);
         }else if (!gameData.game().isCurrentGame()) {
             String errorMessage = "Error: game is over, cannot make move";
             sendError(errorMessage, session);
+//        }else if (){
+//
         } else {
-            if (!gameData.game().validMoves(chessMove.getStartPosition()).contains(chessMove)) {
-
+            gameData.game().makeMove(chessMove);
+            dataAccess.updateGame(gameData.game(),action.getGameID());
+            ChessPiece piece = gameData.game().getBoard().getPiece(chessMove.getStartPosition());
+            ChessPiece.PieceType pieceType = null;
+            if (piece != null) {
+                pieceType = piece.getPieceType();
             }
+            ChessPosition piecePos = chessMove.getEndPosition();
+            String broadcastMessage = String.format("%s moved %s to %s", dataAccess.getUserName(action.getAuthToken()),pieceType,piecePos);
+            sendGame(gameData,session);
+            broadcastGame(action.getGameID(),gameData,session);
+            broadcastMessage(action.getGameID(),broadcastMessage,session);
         }
     }
 
     private boolean checkIfTurn(GameData gameData, String userName) {
-        boolean isTurn = false;
+        boolean isTurn;
         if (gameData.blackUsername().equals(userName)) {
-            isTurn = gameData.blackUsername().equals(userName);
+            isTurn = gameData.game().getTeamTurn().equals(ChessGame.TeamColor.BLACK);
         } else {
-            isTurn = gameData.whiteUsername().equals(userName);
+            isTurn = gameData.game().getTeamTurn().equals(ChessGame.TeamColor.WHITE);
         }
         return isTurn;
     }
@@ -151,9 +165,22 @@ public class WebSocketHandler {
         session.getRemote().sendString(new Gson().toJson(loadGame));
     }
 
+    private void broadcastGame(Integer gameID, GameData game, Session sessionException) throws Exception {
+        LoadGame loadGame = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME,game);
+        for (Session ses : sessions.getSessionForGame(gameID)) {
+            if (ses != sessionException) {
+                ses.getRemote().sendString(new Gson().toJson(loadGame));
+            }
+        }
+    }
+
     private void sendError(String errorMessage, Session session) throws Exception {
         Error error = new Error(ServerMessage.ServerMessageType.ERROR,errorMessage);
         session.getRemote().sendString(new Gson().toJson(error));
     }
 
+    @OnWebSocketError
+    public void webErrorCatching(Session session, Throwable cause) throws Exception {
+        sendError(cause.getMessage(),session);
+    }
 }
